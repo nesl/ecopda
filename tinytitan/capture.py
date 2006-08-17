@@ -429,6 +429,40 @@ class CaptureApp:
         appuifw.note(record_id + u'Wrote to '+ self.fname)
 
     def upload(self):
+        import httplib, urllib
+
+        params = {}
+        params['email']='adparker@gmail.com'
+        params['pw']='ecopda'
+        fh = open(self.fname)
+        xml = fh.read()
+        fh.close()
+        params['data_string']= xml
+        params['type']='xml'
+        params['project_id']="24"
+        params['tableName']='Captures'
+        
+        t1 = time.time()
+        params = urllib.urlencode(params)
+        t2 = time.time()
+        
+        appuifw.note(u'URL Encode Time:' + str(((t2-t1)*1000.)))
+        
+        headers = {}
+        headers['Content-type']='application/x-www-form-urlencoded'
+        headers['Accept']='text/plain'
+
+        t1 = time.time()
+        conn = httplib.HTTPConnection("sensorbase.org")
+        conn.request("POST", "/alpha/upload.php", params, headers)
+        response = conn.getresponse()
+        responseText = response.read()
+        conn.close()
+        t2 = time.time()
+        appuifw.note(u'response: '+str(response.status) + '\n'
+                     + u'time: '+ str((t2-t1)*1000.))
+
+    def upload2(self):
         # upload to www.leninsgodson.com /courses/pys60/php/set_text.php
         import httplib, urllib
         url = "www.leninsgodson.com"
