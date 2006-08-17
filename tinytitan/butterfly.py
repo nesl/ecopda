@@ -78,7 +78,8 @@ def default_combo_index(thelist, target_item, default_index=0):
 
 ### Capture Object
 class Capture:
-    def __init__(self, **kw):
+    def __init__(self, id=None, **kw):
+        self.id = id
         # Combos, used by the form
         self.position_combo  = [u'U',u'C']
         self.family_combo    = [u'Nymphalidae', u'Other']
@@ -94,25 +95,24 @@ class Capture:
 
         # Dict of form fields
         self.capture_dict = {
-            u'id'        : None, # this does not appear in the form
-            u'site'      : u'', # Caxluana
-            u'date'      : time.time(), # Seconds since epoch
-            u'time'       : float((time.gmtime()[3] * 3600 \
+            'site'      : u'', # Caxluana
+            'date'      : time.time(), # Seconds since epoch
+            'time'       : float((time.gmtime()[3] * 3600 \
                                   + time.gmtime()[4] * 60 + \
                                   + time.gmtime()[5])), # Seconds since midnight
-            u'ima'       : 0, # The Array ID
-            u'xcoord'    : 0, # Array X coord
-            u'ycoord'    : 0, # Array Y coord
-            u'position'  : u'', # Stratum: Canopy or Understory
-            u'family'    : u'',
-            u'subfamily' : u'',
-            u'genus'     : u'',
-            u'species'   : u'',
-            u'sex'       : u'',
-            u'recapture' : u'',
-            u'date_of_identification' : 0.0,
-            u'identified_by' : u'',
-            u'comments'  : u''}
+            'ima'       : 0, # The Array ID
+            'xcoord'    : 0, # Array X coord
+            'ycoord'    : 0, # Array Y coord
+            'position'  : u'', # Stratum: Canopy or Understory
+            'family'    : u'',
+            'subfamily' : u'',
+            'genus'     : u'',
+            'species'   : u'',
+            'sex'       : u'',
+            'recapture' : u'',
+            'date_of_identification' : 0.0,
+            'identified_by' : u'',
+            'comments'  : u''}
 
         # Pick up anything new specified by user.
         self.capture_dict.update(kw)
@@ -120,8 +120,8 @@ class Capture:
     def create_form_fields(self):
         form_fields = [(u'Site','text',self.capture_dict[u'site']),
                        (u'Date','date', self.capture_dict[u'date']),
-                       (u'Time GMT','time',self.capture_dict[u'time']),
-                       (u'IMA#','number',self.capture_dict[u'ima']),
+                       (u'Time','time',self.capture_dict[u'time']),
+                       (u'IMA','number',self.capture_dict[u'ima']),
                        (u'xcoord','number',self.capture_dict[u'xcoord']),
                        (u'ycoord','number',self.capture_dict[u'ycoord']),
                        (u'Position','combo',(self.position_combo,
@@ -141,24 +141,51 @@ class Capture:
                        (u'Recapture','combo',(self.recapture_combo,
                                               default_combo_index(self.recapture_combo,
                                                                   self.capture_dict['recapture']))),
-                       (u'Date of Identification','date',self.capture_dict['date_of_identification']),
-                       (u'Identified By','text',self.capture_dict['identified_by']),
+                       (u'Date_of_Identification','date',self.capture_dict['date_of_identification']),
+                       (u'Identified_By','text',self.capture_dict['identified_by']),
                        (u'Comments','text',self.capture_dict[u'comments'])]
         return form_fields
 
     def save_hook(self, form):
         # TODO save to DB
-        return 1
+        # form is the user's form.
+        # Has the structure [(u'field_name','type','data'), ... ]
+        for i in form:
+            field_name = str(i[0]).lower()
+            field_val = None
+            if (i[1] != 'combo'):
+                field_val = i[2]
+            else: # this is how you deal with combos
+                List, Index = i[2]
+                field_val = List[Index]
+            if field_name in self.capture_dict:
+                self.capture_dict[field_name] = field_val 
+            else:
+                appuifw.note(u"bug: " + field_name + " not in dictionary.", "error")
 
-    def create_form(self):
+        captureORM = Captures(db, self.id, **self.capture_dict)
+        if self.id == None:
+            # I was new
+            self.id = captureORM.id
+        else:
+            # I was old. So I have to update the DB
+            captureORM.set(**self.capture_dict)
+        appuifw.note(u"Saved to DB row id:" + str(self.id), "conf")
+        
+
+    def create_form(self, flags = None):
         # Set the view/edit mode of the form
-        flags = appuifw.FFormEditModeOnly + appuifw.FFormDoubleSpaced
+        if not flags:
+            flags = appuifw.FFormEditModeOnly + appuifw.FFormDoubleSpaced
         form_fields = self.create_form_fields()
         # Creates the form
         form = appuifw.Form(form_fields, flags)
         form.save_hook = self.save_hook
         return form
 
+    def execute_form(self, flags = None):
+        form = self.create_form(flags)
+        form.execute()
 
     
 class CaptureApp:
@@ -172,7 +199,7 @@ class CaptureApp:
     
     def __init__(self):
         self.listbox = None
-        
+        self.ListID = []
     def switch_in(self):
         # Make selection box showing all previously saved captures.
         # Display ID/Date/Time from newest to oldest.
@@ -187,14 +214,20 @@ class CaptureApp:
 
         # Fetch a list of previously saved captures:
         # TODO Try with 'id DESC'
-        capture_iter = Captures.select(db, orderby=u'id') 
+
+        capture_iter = Captures.select(db, orderby='id DESC') 
 
         # For each row, Add an id number to the list
         L = [u'Create New']
+        self.ListID = [None]
+        # TEST
         try:
             while 1:
                 captureORM = capture_iter.next()
-                L.append(str(captureORM.id))
+                L.append(    #unicode(captureORM.id)
+                         u' ' + time.ctime( captureORM.date + captureORM.time )
+                         + ' GMT')
+                self.ListID.append(captureORM.id) 
         except StopIteration:
             pass
 
@@ -214,22 +247,28 @@ class CaptureApp:
             # TODO
             pop_up_L = [u'View',u'Edit',u'Delete']
             pop_up_index = appuifw.popup_menu(pop_up_L, u"Select Action")
+            captureORM = Captures(db,id=self.ListID[self.listbox.current()])
             if pop_up_index == 0: # View
-                #TODO
-                appuifw.note(u'TODO View')
+                capture = Capture(**captureORM.dict())
+                capture.execute_form(appuifw.FFormViewModeOnly
+                                    + appuifw.FFormDoubleSpaced)
             elif pop_up_index == 1: # Edit
-                # TODO
-                appuifw.note(u'TODO Edit')
+                # Create a new form instantiated
+                # capturesORM with that ID.
+                capture = Capture(**captureORM.dict())
+                capture.execute_form()
             elif pop_up_index == 2: # Delete
-                appuifw.note(u'TODO Delete')
+                # are you sure you want to delete blah?
+                # TODO
+                captureORM.delete()
+                appuifw.note(u"Deleted.")
 
         # This will update the listbox
         self.switch_in()
         
     def new_capture(self):
         capture = Capture()
-        form = capture.create_form()
-        form.execute()
+        capture.execute_form()
         # At this point, user has exited form.
         
     def switch_out(self):
@@ -254,7 +293,6 @@ appuifw.app.exit_key_handler = exit_key_handler
 
 # Read in the DB
 db = e32db.Dbms()
-dbv = e32db.Db_view()
 db.open(u'e:\\test.db')
 
 # Create the tabs with its names in unide as a list, include the tab handler
