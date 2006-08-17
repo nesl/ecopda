@@ -9,6 +9,8 @@ import orm
 import keyboard
 import e32db
 
+import camera
+from graphics import *
 
 # This is the ORM to the table 'Captures'
 class Captures(orm.Mapper):
@@ -29,7 +31,8 @@ class Captures(orm.Mapper):
         date_of_identification = orm.column(orm.Float)
         identified_by = orm.column(orm.String)
         comments = orm.column(orm.String)
-        # image file ?
+        picture_filename = orm.column(orm.String)
+        audio_filename = orm.column(orm.String)
     def create_table(cls, db):
         q = 'CREATE TABLE ' + cls.__name__ + ' '
         q += '(id COUNTER,'
@@ -48,7 +51,9 @@ class Captures(orm.Mapper):
         q += 'recapture VARCHAR,'
         q += 'date_of_identification FLOAT,'
         q += 'identified_by VARCHAR,'
-        q += 'comments LONG VARCHAR)' 
+        q += 'comments LONG VARCHAR,'
+        q += 'picture_filename VARCHAR,'
+        q += 'audio_filename VARCHAR)'
         db.execute(q)
         q = 'CREATE UNIQUE INDEX id_index ON '
         q += cls.__name__ + ' (id)'
@@ -65,6 +70,8 @@ class Capture:
     def __init__(self, db, id=None, **kw):
         self.db = db
         self.id = id
+        self.form = None
+        self.picture = None
         # Combos, used by the form
         self.position_combo  = [u'U',u'C']
         self.family_combo    = [u'Nymphalidae', u'Other']
@@ -97,7 +104,9 @@ class Capture:
             'recapture' : u'',
             'date_of_identification' : float(0),
             'identified_by' : u'',
-            'comments'  : u''}
+            'comments'  : u'',
+            'picture_filename' : u'',
+            'audio_filename' : u''}
 
         # Pick up anything new specified by caller.
         self.capture_dict.update(kw)
@@ -130,14 +139,16 @@ class Capture:
                                                                   self.capture_dict['recapture']))),
                        (u'Date_of_Identification','date',self.capture_dict['date_of_identification']),
                        (u'Identified_By','text',self.capture_dict['identified_by']),
-                       (u'Comments','text',self.capture_dict[u'comments'])]
+                       (u'Comments','text',self.capture_dict[u'comments']),
+                       (u'Picture Filename','text',self.capture_dict[u'picture_filename']),
+                       (u'Audio Filename','text',self.capture_dict[u'audio_filename'])]
         return form_fields
 
-    def save_hook(self, form):
+    def save_hook(self, form_list):
         # TODO save to DB
         # form is the user's form.
         # Has the structure [(u'field_name','type','data'), ... ]
-        for i in form:
+        for i in form_list:
             field_name = str(i[0]).lower()
             field_val = None
             if (i[1] != 'combo'):
@@ -166,13 +177,16 @@ class Capture:
             flags = appuifw.FFormEditModeOnly + appuifw.FFormDoubleSpaced
         form_fields = self.create_form_fields()
         # Creates the form
-        form = appuifw.Form(form_fields, flags)
-        form.save_hook = self.save_hook
-        return form
+        self.form = appuifw.Form(form_fields, flags)
+        self.form.save_hook = self.save_hook
+        return self.form
 
     def execute_form(self, flags = None):
-        form = self.create_form(flags)
-        form.execute()
+        self.form = self.create_form(flags)
+        self.form.execute()
+
+
+    
 
     
 class CaptureApp:
@@ -233,11 +247,11 @@ class CaptureApp:
             # Create a popup selection box that asks for
             # VIEW, EDIT, DELETE
             # TODO
-            pop_up_L = [u'View',u'Edit',u'Delete']
+            pop_up_L = [u'View',u'Edit',u'Delete', u'Take Picture']
             pop_up_index = appuifw.popup_menu(pop_up_L, u"Select Action")
             captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
             if pop_up_index == 0: # View
-                capture = Capture(self.db**captureORM.dict())
+                capture = Capture(self.db,**captureORM.dict())
                 capture.execute_form(appuifw.FFormViewModeOnly
                                     + appuifw.FFormDoubleSpaced)
             elif pop_up_index == 1: # Edit
@@ -250,7 +264,9 @@ class CaptureApp:
                 # TODO
                 captureORM.delete()
                 appuifw.note(u"Deleted.")
-
+            elif pop_up_index == 3: # Take Picture
+                self.take_picture(captureORM)
+                
         # This will update the listbox
         self.switch_in()
         
@@ -262,4 +278,28 @@ class CaptureApp:
     def switch_out(self):
         return
     
+    def take_picture(self, captureORM):
+        screen_picture = camera.take_photo(size = (1280, 960))
+        img = Image.new((176,208))
+        canvas = appuifw.Canvas(redraw_callback=self.handle_redraw)
+        self.filename_prefix = u'e:\\Images\obs_'
+        self.filename = u''
+        old_body = appuifw.app.body
+        appuifw.app.body = canvas
+        #appuifw.app.menu =[(u"Save Image", self.save_picture)]
+        appuifw.app.title = u'Image'
+        self.filename = self.filename_prefix + str(int(time.time())) + u'.jpg'
+        data = appuifw.query(u"Save this image to " + self.filename,"query")
+        if data:
+            screen_picture.save(self.filename)
+            captureORM.picture_filename = self.filename
+            appuifw.note(u"Saved." + self.filename, "conf")
+        self.handle_redraw(())
+        appuifw.app.body = old_body
+        
+
+
+    def handle_redraw(self,rect):
+          self.img.blit(self.screen_picture, target=(8,10, 168, 130), scale=1)
+          self.canvas.blit(self.img)
 

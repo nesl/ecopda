@@ -22,6 +22,9 @@ Q("DROP TABLE Traps")
 Q("CREATE TABLE Traps (id COUNTER, site VARCHAR, date FLOAT, time FLOAT, ima INTEGER, xcoord INTEGER, ycoord INTEGER, position VARCHAR, date_of_first_baiting FLOAT, height FLOAT, temperature FLOAT, humidity FLOAT, wind_speed FLOAT, date_of_bait_prep FLOAT, date_of_bait_refill FLOAT, canopy_cover VARCHAR, collectors VARCHAR, comments LONG VARCHAR)",db, dbv)
 Q("CREATE UNIQUE INDEX id_index ON Traps (id)",db,dbv)
 
+## Altering a table
+Q("ALTER TABLE Captures ADD picture_filename VARCHAR",db,dbv)
+Q("ALTER TABLE Captures ADD audio_filename VARCHAR",db,dbv)
 
 Q("SELECT * FROM Person", db, dbv)
 
