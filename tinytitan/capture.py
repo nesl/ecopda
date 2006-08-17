@@ -12,6 +12,8 @@ import e32db
 import camera
 from graphics import *
 
+import audio
+
 # This is the ORM to the table 'Captures'
 class Captures(orm.Mapper):
     class mapping:
@@ -187,6 +189,46 @@ class Capture:
 
 
     
+class AudioApp:
+    def __init__(self, exit_cb, captureORM):
+        self.captureORM = captureORM
+        self.filename = u''
+        if self.captureORM.audio_filename != None:
+            self.filename = self.captureORM.audio_filename
+        self.S = None
+        self.body = appuifw.Canvas()
+        #self.body = appuifw.Text(u'Audio Mode')
+        appuifw.app.title = u'Audio Mode'
+        
+        self.filename_prefix = u'e:\\Sounds\obs_'
+        self.exit_cb = exit_cb
+    def recording(self):
+        self.filename = self.filename_prefix + str(int(time.time())) + u'.wav'
+        self.S = audio.Sound.open(self.filename)
+        self.S.record()
+        self.captureORM.audio_filename = self.filename
+        appuifw.note(u"Recording to " + self.filename)
+    def playing(self):
+        try:
+            self.S = audio.Sound.open(self.filename)
+            self.S.play()
+            appuifw.note(u"Playing " + self.filename)
+        except:
+            appuifw.note(u"Record something first.")
+    def closing(self):
+        self.S.stop()
+        self.S.close()
+        appuifw.note(u"Stopped.")
+    def switch_in(self):
+        appuifw.app.menu =[(u"play", self.playing),
+                           (u"record", self.recording),
+                           (u"stop", self.closing),
+                           (u"exit", self.switch_out)]
+        appuifw.app.title = u'Audio'
+        appuifw.app.body = self.body
+    def switch_out(self):
+        self.exit_cb
+        return
 
     
 class CaptureApp:
@@ -247,7 +289,7 @@ class CaptureApp:
             # Create a popup selection box that asks for
             # VIEW, EDIT, DELETE
             # TODO
-            pop_up_L = [u'View',u'Edit',u'Delete', u'Take Picture']
+            pop_up_L = [u'View',u'Edit',u'Delete', u'Take Picture', u'Audio Options']
             pop_up_index = appuifw.popup_menu(pop_up_L, u"Select Action")
             captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
             if pop_up_index == 0: # View
@@ -266,6 +308,8 @@ class CaptureApp:
                 appuifw.note(u"Deleted.")
             elif pop_up_index == 3: # Take Picture
                 self.take_picture(captureORM)
+            elif pop_up_index == 4: # Take Audio
+                self.audio_options(captureORM)
                 
         # This will update the listbox
         self.switch_in()
@@ -284,7 +328,7 @@ class CaptureApp:
         self.canvas = appuifw.Canvas(redraw_callback=self.handle_redraw)
         self.filename_prefix = u'e:\\Images\obs_'
         self.filename = u''
-        old_body = appuifw.app.body
+        self.old_body = appuifw.app.body
         appuifw.app.body = self.canvas
         #appuifw.app.menu =[(u"Save Image", self.save_picture)]
         appuifw.app.title = u'Image'
@@ -295,9 +339,18 @@ class CaptureApp:
             captureORM.picture_filename = self.filename
             appuifw.note(u"Saved." , "conf")
         self.handle_redraw(())
-        appuifw.app.body = old_body
+        appuifw.app.body = self.old_body
         
+    def audio_options(self, captureORM):
+        self.old_body = appuifw.app.body
+        self.audioApp = AudioApp(self.audio_exit_cb, captureORM)
+        self.audioApp.switch_in()
 
+    def audio_exit_cb(self):
+        appuifw.app.body = self.old_body
+        appuifw.app.title = u'Capture'
+        return
+        
 
     def handle_redraw(self,rect):
           self.img.blit(self.screen_picture, target=(8,10, 168, 130), scale=1)
