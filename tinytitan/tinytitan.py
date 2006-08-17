@@ -103,7 +103,7 @@ class GPS:
                                   appuifw.note(u"Could not open the map, %s"%E,'info')
                            self.displayUrl = self.url
                            self.running = 0
-            time.sleep(0.2)
+            e32.ao_sleep(0.2)
 
 class GPSApp:
       def __init__(self):
