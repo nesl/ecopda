@@ -158,7 +158,7 @@ class TrapApp:
         self.listbox = None
         self.ListID = []
         self.db = db
-        self.fname = u'e:\\python\\butterfly_data\\traps.xml'
+        self.fname = u'e:\\butterfly_data\\traps.xml'
     def switch_in(self):
         appuifw.app.title = u'Trap Device'
         appuifw.app.menu = [(u'Export Traps', self.export),
@@ -211,11 +211,10 @@ class TrapApp:
                 output += trapORM.slog_out()
         except StopIteration:
             output += '</table>'
-        fname = u'e:\\python\\butterfly_data\\traps.xml'
-        f = open(fname, 'w')
+        f = open(self.fname, 'w')
         f.write(output)
         f.close()
-        appuifw.note(u'Wrote to '+ fname)
+        appuifw.note(u'Wrote to '+ self.fname)
 
     def upload(self):
         # upload to www.leninsgodson.com /courses/pys60/php/set_text.php

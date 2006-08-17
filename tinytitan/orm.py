@@ -69,9 +69,10 @@ class Mapper(object):
             return self.__dict__[name]
     def __repr__(self):
         return '<%s id=%d>' % (self.__class__.__name__, self.id)
-    def slog_out(self):
+    def slog_out(self, mydict = None):
         output = '\t<row>\n'
-        mydict = self.dict()
+        if mydict == None:
+            mydict = self.dict()
         for k,v in mydict.items():
             output += '\t\t<field name="'+k+'">'+str(v)+'</field>\n' 
         output += '\t</row>\n'

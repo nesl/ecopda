@@ -244,7 +244,7 @@ class CaptureApp:
         self.listbox = None
         self.ListID = []
         self.db = db
-        self.fname = u'e:\\python\\butterfly_data\\captures.xml'
+        self.fname = u'e:\\butterfly_data\\captures.xml'
     def switch_in(self):
         appuifw.app.title = u'Capture'
 
@@ -372,13 +372,42 @@ class CaptureApp:
         #     <field name="NAME">VALUE</field>
         #   </row>
         # </table>
+        import base64
         capture_iter = Captures.select(self.db)
         output = u''
         output += '<table>\n'
         try:
             while 1:
                 captureORM = capture_iter.next()
-                output += captureORM.slog_out()
+                mydict = captureORM.dict()
+                # replace copy out audio_filename and picture_filename
+                # replace with audio_file and picture_file
+                picture_filename = mydict['picture_filename']
+                del mydict['picture_filename']
+                picture_file_handle = None
+                picture_b64 = u''
+                try:
+
+                    base64.encode(open(picture_filename),
+                                  open(picture_filename+".b64","w"))
+                    picture_b64 = repr(open(picture_filename+".b64").read())
+                    appuifw.note(u'Encoded:'+picture_filename)
+                except:
+                    pass
+
+
+                audio_filename = mydict['audio_filename']
+                del mydict['audio_filename']
+                audio_file_handle = None
+                audio_b64 = u''
+                try:
+                    base64.encode(open(audio_filename),
+                                  open(audio_filename+".b64","w"))
+                    audio_b64 = repr(open(audio_filename+".b64").read())
+                    appuifw.note(u'Encoded:'+audio_filename)
+                except:
+                    pass
+                output += captureORM.slog_out(mydict=mydict)
         except StopIteration:
             output += '</table>'
 
