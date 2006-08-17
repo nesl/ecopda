@@ -70,12 +70,11 @@ class Mapper(object):
     def __repr__(self):
         return '<%s id=%d>' % (self.__class__.__name__, self.id)
     def slog_out(self, mydict = None):
-        output = '\t<row>\n'
+        output = ''
         if mydict == None:
             mydict = self.dict()
         for k,v in mydict.items():
             output += '\t\t<field name="'+k+'">'+str(v)+'</field>\n' 
-        output += '\t</row>\n'
         return output
     def quote(self, name, value):
         if self.mapping.__dict__[name].coltype == String:

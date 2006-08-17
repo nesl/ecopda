@@ -384,33 +384,45 @@ class CaptureApp:
                 # replace with audio_file and picture_file
                 picture_filename = mydict['picture_filename']
                 del mydict['picture_filename']
-                picture_file_handle = None
-                picture_b64 = u''
-                try:
-
-                    base64.encode(open(picture_filename),
-                                  open(picture_filename+".b64","w"))
-                    picture_b64 = repr(open(picture_filename+".b64").read())
-                    appuifw.note(u'Encoded:'+picture_filename)
-                except:
-                    pass
-
-
                 audio_filename = mydict['audio_filename']
                 del mydict['audio_filename']
+
+                appuifw.note(u'Exporting record id:'+str(mydict['id']))
+
+                output += '\t<row>\n'
+                output += captureORM.slog_out(mydict=mydict)
+
+                picture_file_handle = None
+                picture_b64 = u''
                 audio_file_handle = None
                 audio_b64 = u''
+
                 try:
-                    base64.encode(open(audio_filename),
-                                  open(audio_filename+".b64","w"))
-                    audio_b64 = repr(open(audio_filename+".b64").read())
-                    appuifw.note(u'Encoded:'+audio_filename)
+                    appuifw.note(u'Encoding:'+picture_filename)
+                    base64.encode(open(picture_filename),
+                                  open(picture_filename+".b64","w"))
+                    picture_b64 = open(picture_filename+".b64").read()
+                    output += '\t\t<field name="picture">'
+                    output += picture_b64
+                    output += '</field>\n'
+
                 except:
                     pass
-                output += captureORM.slog_out(mydict=mydict)
+                try:
+                    appuifw.note(u'Encoding:'+audio_filename)
+                    base64.encode(open(audio_filename),
+                                  open(audio_filename+".b64","w"))
+                    audio_b64 = open(audio_filename+".b64").read()
+                    output += '\t\t<field name="audio">'
+                    output += audio_b64
+                    output += '</field>\n'
+                except:
+                    pass
+
+                output += '\t</row>\n'
         except StopIteration:
             output += '</table>'
-
+        
         f = open(self.fname, 'w')
         f.write(output)
         f.close()
