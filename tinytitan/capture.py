@@ -62,7 +62,8 @@ class Captures(orm.Mapper):
 
 ### Capture Object
 class Capture:
-    def __init__(self, id=None, **kw):
+    def __init__(self, db, id=None, **kw):
+        self.db = db
         self.id = id
         # Combos, used by the form
         self.position_combo  = [u'U',u'C']
@@ -94,13 +95,15 @@ class Capture:
             'species'   : u'',
             'sex'       : u'',
             'recapture' : u'',
-            'date_of_identification' : 0.0,
+            'date_of_identification' : float(0),
             'identified_by' : u'',
             'comments'  : u''}
 
         # Pick up anything new specified by caller.
         self.capture_dict.update(kw)
-        
+
+    ## NOTE: form field names need to map to dict names,
+    ## which need to map to variable names.
     def create_form_fields(self):
         form_fields = [(u'Site','text',self.capture_dict[u'site']),
                        (u'Date','date', self.capture_dict[u'date']),
@@ -147,7 +150,7 @@ class Capture:
             else:
                 appuifw.note(u"bug: " + field_name + " not in dictionary.", "error")
 
-        captureORM = Captures(db, self.id, **self.capture_dict)
+        captureORM = Captures(self.db, self.id, **self.capture_dict)
         if self.id == None:
             # I was new
             self.id = captureORM.id
@@ -186,6 +189,7 @@ class CaptureApp:
         self.ListID = []
         self.db = db
     def switch_in(self):
+        appuifw.app.title = u'Capture'
         # Make selection box showing all previously saved captures.
         # Display ID/Date/Time from newest to oldest.
         # Can I show a picture?
@@ -199,11 +203,10 @@ class CaptureApp:
 
         # Fetch a list of previously saved captures:
         # TODO Try with 'id DESC'
-
         capture_iter = Captures.select(self.db, orderby='id DESC') 
 
         # For each row, Add an id number to the list
-        L = [u'Create New']
+        L = [u'Create New Capture']
         self.ListID = [None]
         # TEST
         try:
@@ -234,13 +237,13 @@ class CaptureApp:
             pop_up_index = appuifw.popup_menu(pop_up_L, u"Select Action")
             captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
             if pop_up_index == 0: # View
-                capture = Capture(**captureORM.dict())
+                capture = Capture(self.db**captureORM.dict())
                 capture.execute_form(appuifw.FFormViewModeOnly
                                     + appuifw.FFormDoubleSpaced)
             elif pop_up_index == 1: # Edit
                 # Create a new form instantiated
                 # capturesORM with that ID.
-                capture = Capture(**captureORM.dict())
+                capture = Capture(self.db,**captureORM.dict())
                 capture.execute_form()
             elif pop_up_index == 2: # Delete
                 # are you sure you want to delete blah?
@@ -252,7 +255,7 @@ class CaptureApp:
         self.switch_in()
         
     def new_capture(self):
-        capture = Capture()
+        capture = Capture(self.db)
         capture.execute_form()
         # At this point, user has exited form.
         

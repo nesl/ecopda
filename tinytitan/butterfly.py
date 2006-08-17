@@ -7,6 +7,7 @@ sys.path.append('e:\\python') #to properly find orm and keyboard
 import orm
 import keyboard
 import capture
+import trap
 
 import e32db
 
@@ -23,6 +24,8 @@ def exit_key_handler():
 def handle_tab(index):
     if index == 0:
         capture_app.switch_in()
+    elif index == 1:
+        trap_app.switch_in()
 
 # Create an Active object
 app_lock = e32.Ao_lock()
@@ -30,10 +33,11 @@ app_lock = e32.Ao_lock()
 appuifw.app.exit_key_handler = exit_key_handler
 
 # Create the tabs with its names in unide as a list, include the tab handler
-appuifw.app.set_tabs([u'Capture'], handle_tab)
+appuifw.app.set_tabs([u'Capture', u'Trap'], handle_tab)
 
 # Create the application objects
 capture_app = capture.CaptureApp(db)
+trap_app = trap.TrapApp(db)
 
 # Set app.body to app1 (for start of script)
 handle_tab(0)
