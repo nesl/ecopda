@@ -110,7 +110,7 @@ class Capture:
             u'species'   : u'',
             u'sex'       : u'',
             u'recapture' : u'',
-            u'date_of_identification' : u'',
+            u'date_of_identification' : 0.0,
             u'identified_by' : u'',
             u'comments'  : u''}
 
@@ -138,11 +138,11 @@ class Capture:
                        (u'Sex','combo',(self.sex_combo,
                                         default_combo_index(self.sex_combo,
                                                             self.capture_dict[u'sex']))),
-#                        (u'Recapture','combo',(self.recapture_combo,
-#                                               default_combo_index(self.recapture_combo,
-#                                                                   self.capture_dict['recapture']))),
-#                        (u'Date of Classification','date',self.capture_dict['date_of_classification']),
-#                        (u'Identified By','text',self.capture_dict['identified_by']),
+                       (u'Recapture','combo',(self.recapture_combo,
+                                              default_combo_index(self.recapture_combo,
+                                                                  self.capture_dict['recapture']))),
+                       (u'Date of Identification','date',self.capture_dict['date_of_identification']),
+                       (u'Identified By','text',self.capture_dict['identified_by']),
                        (u'Comments','text',self.capture_dict[u'comments'])]
         return form_fields
 
