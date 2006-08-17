@@ -25,6 +25,8 @@ Q("CREATE UNIQUE INDEX id_index ON Traps (id)",db,dbv)
 ## Altering a table
 Q("ALTER TABLE Captures ADD picture_filename VARCHAR",db,dbv)
 Q("ALTER TABLE Captures ADD audio_filename VARCHAR",db,dbv)
+Q("ALTER TABLE Captures ADD specimen_code VARCHAR",db,dbv)
+
 
 Q("SELECT * FROM Person", db, dbv)
 

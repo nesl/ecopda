@@ -24,6 +24,7 @@ class Captures(orm.Mapper):
         xcoord = orm.column(orm.Integer)
         ycoord = orm.column(orm.Integer)
         position = orm.column(orm.String)
+        specimen_code = orm.column(orm.String)
         family = orm.column(orm.String)
         subfamily = orm.column(orm.String)
         genus = orm.column(orm.String)
@@ -45,6 +46,7 @@ class Captures(orm.Mapper):
         q += 'xcoord INTEGER,'
         q += 'ycoord INTEGER,'
         q += 'position VARCHAR,'
+        q += 'specimen_code VARCHAR,'
         q += 'family VARCHAR,'
         q += 'subfamily VARCHAR,'
         q += 'genus VARCHAR,'
@@ -98,6 +100,7 @@ class Capture:
             'xcoord'    : 0, # Array X coord
             'ycoord'    : 0, # Array Y coord
             'position'  : u'', # Stratum: Canopy or Understory
+            'specimen_code' : u'',
             'family'    : u'',
             'subfamily' : u'',
             'genus'     : u'',
@@ -125,6 +128,7 @@ class Capture:
                        (u'Position','combo',(self.position_combo,
                                              butterfly_helper.default_combo_index(self.position_combo,
                                                                  self.capture_dict[u'position']))),
+                       (u'Specimen_Code','text',self.capture_dict[u'specimen_code']),
                        (u'Family','combo',(self.family_combo,
                                            butterfly_helper.default_combo_index(self.family_combo,
                                                                self.capture_dict[u'family']))),
@@ -374,9 +378,9 @@ class CaptureApp:
         # </table>
         import base64
         capture_iter = Captures.select(self.db)
-        output = u''
-        output += '<table>\n'
+        f = open(self.fname, 'w')
         try:
+            f.write('<table>\n')
             while 1:
                 captureORM = capture_iter.next()
                 mydict = captureORM.dict()
@@ -386,47 +390,43 @@ class CaptureApp:
                 del mydict['picture_filename']
                 audio_filename = mydict['audio_filename']
                 del mydict['audio_filename']
+                record_id = u'Rec ID' + unicode(mydict['id']) + u'\n'
+                appuifw.note(record_id + 'Exporting')
 
-                appuifw.note(u'Exporting record id:'+str(mydict['id']))
-
-                output += '\t<row>\n'
-                output += captureORM.slog_out(mydict=mydict)
+                f.write('\t<row>\n')
+                f.write(captureORM.slog_out(mydict=mydict))
 
                 picture_file_handle = None
                 picture_b64 = u''
                 audio_file_handle = None
                 audio_b64 = u''
+                
 
                 try:
-                    appuifw.note(u'Encoding:'+picture_filename)
-                    base64.encode(open(picture_filename),
-                                  open(picture_filename+".b64","w"))
-                    picture_b64 = open(picture_filename+".b64").read()
-                    output += '\t\t<field name="picture">'
-                    output += picture_b64
-                    output += '</field>\n'
-
+                    fh = open(picture_filename)
+                    appuifw.note(record_id + u'Encoding:'+picture_filename)
+                    f.write('\t\t<field name="picture">')
+                    base64.encode(fh,f)
+                    fh.close()
+                    f.write('</field>\n')
                 except:
                     pass
                 try:
-                    appuifw.note(u'Encoding:'+audio_filename)
-                    base64.encode(open(audio_filename),
-                                  open(audio_filename+".b64","w"))
-                    audio_b64 = open(audio_filename+".b64").read()
-                    output += '\t\t<field name="audio">'
-                    output += audio_b64
-                    output += '</field>\n'
+                    fh = open(audio_filename)
+                    appuifw.note(record_id + u'Encoding:'+audio_filename)
+                    f.write('\t\t<field name="audio">')
+                    base64.encode(fh,f)
+                    fh.close()
+                    f.write('</field>\n')
                 except:
                     pass
 
-                output += '\t</row>\n'
+                f.write('\t</row>\n')
         except StopIteration:
-            output += '</table>'
+            f.write('</table>')
         
-        f = open(self.fname, 'w')
-        f.write(output)
         f.close()
-        appuifw.note(u'Wrote to '+ self.fname)
+        appuifw.note(record_id + u'Wrote to '+ self.fname)
 
     def upload(self):
         # upload to www.leninsgodson.com /courses/pys60/php/set_text.php
