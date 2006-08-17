@@ -9,9 +9,6 @@ import orm
 import keyboard
 import e32db
 
-# Read in the DB
-db = e32db.Dbms()
-db.open(u'e:\\test.db')
 
 # This is the ORM to the table 'Captures'
 class Captures(orm.Mapper):
@@ -44,14 +41,14 @@ class Captures(orm.Mapper):
         q += 'ycoord INTEGER,'
         q += 'position VARCHAR,'
         q += 'family VARCHAR,'
-        q += 'subfamily VARHCAR,'
-        q += 'genus VARHCAR,'
-        q += 'species VARHCAR,'
-        q += 'sex VARHCAR,'
-        q += 'recapture VARHCAR,'
+        q += 'subfamily VARCHAR,'
+        q += 'genus VARCHAR,'
+        q += 'species VARCHAR,'
+        q += 'sex VARCHAR,'
+        q += 'recapture VARCHAR,'
         q += 'date_of_identification FLOAT,'
-        q += 'identified_by VARHCAR,'
-        q += 'comments LONG VARHCAR)' 
+        q += 'identified_by VARCHAR,'
+        q += 'comments LONG VARCHAR)' 
         db.execute(q)
         q = 'CREATE UNIQUE INDEX id_index ON '
         q += cls.__name__ + ' (id)'
@@ -101,7 +98,7 @@ class Capture:
             'identified_by' : u'',
             'comments'  : u''}
 
-        # Pick up anything new specified by user.
+        # Pick up anything new specified by caller.
         self.capture_dict.update(kw)
         
     def create_form_fields(self):
@@ -184,9 +181,10 @@ class CaptureApp:
     #   EDIT Current Capture
     #   DELETE Current Capture
     
-    def __init__(self):
+    def __init__(self, db):
         self.listbox = None
         self.ListID = []
+        self.db = db
     def switch_in(self):
         # Make selection box showing all previously saved captures.
         # Display ID/Date/Time from newest to oldest.
@@ -202,7 +200,7 @@ class CaptureApp:
         # Fetch a list of previously saved captures:
         # TODO Try with 'id DESC'
 
-        capture_iter = Captures.select(db, orderby='id DESC') 
+        capture_iter = Captures.select(self.db, orderby='id DESC') 
 
         # For each row, Add an id number to the list
         L = [u'Create New']
@@ -234,7 +232,7 @@ class CaptureApp:
             # TODO
             pop_up_L = [u'View',u'Edit',u'Delete']
             pop_up_index = appuifw.popup_menu(pop_up_L, u"Select Action")
-            captureORM = Captures(db,id=self.ListID[self.listbox.current()])
+            captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
             if pop_up_index == 0: # View
                 capture = Capture(**captureORM.dict())
                 capture.execute_form(appuifw.FFormViewModeOnly

@@ -10,6 +10,9 @@ import capture
 
 import e32db
 
+# Read in the DB
+db = e32db.Dbms()
+db.open(u'e:\\test.db')
 
 ######################
 ### Main part of application
@@ -30,7 +33,7 @@ appuifw.app.exit_key_handler = exit_key_handler
 appuifw.app.set_tabs([u'Capture'], handle_tab)
 
 # Create the application objects
-capture_app = capture.CaptureApp()
+capture_app = capture.CaptureApp(db)
 
 # Set app.body to app1 (for start of script)
 handle_tab(0)
