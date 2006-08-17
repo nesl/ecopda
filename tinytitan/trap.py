@@ -158,8 +158,11 @@ class TrapApp:
         self.listbox = None
         self.ListID = []
         self.db = db
+        self.fname = u'e:\\python\\butterfly_data\\traps.xml'
     def switch_in(self):
         appuifw.app.title = u'Trap Device'
+        appuifw.app.menu = [(u'Export Traps', self.export),
+                            (u'Upload Traps', self.upload)]
         trap_iter = Traps.select(self.db, orderby='id DESC') 
         L = [u'Create New Trap']
         self.ListID = [None]
@@ -198,7 +201,38 @@ class TrapApp:
     def switch_out(self):
         return
 
-        
-            
+    def export(self):
+        trap_iter = Traps.select(self.db)
+        output = u''
+        output += '<table>\n'
+        try:
+            while 1:
+                trapORM = trap_iter.next()
+                output += trapORM.slog_out()
+        except StopIteration:
+            output += '</table>'
+        fname = u'e:\\python\\butterfly_data\\traps.xml'
+        f = open(fname, 'w')
+        f.write(output)
+        f.close()
+        appuifw.note(u'Wrote to '+ fname)
+
+    def upload(self):
+        # upload to www.leninsgodson.com /courses/pys60/php/set_text.php
+        import httplib, urllib
+        url = "www.leninsgodson.com"
+        headers = {"Content-type": "application/xml"}
+        fname_handle = open(self.fname)
+        data = fname_handle.read()
+        fname_handle.close()
+        try:
+            conn = httplib.HTTPConnection(url)
+            conn.request("POST","/courses/pys60/php/set_text.php", data, headers)
+            response = conn.getresponse()
+            conn.close()
+            appuifw.note(u'Response: '+str(response.status))
+        except IOError,(errno, sterror):
+            appuifw.note(u'I/O Error(%s)' % (errno,strerror))
+
 
 

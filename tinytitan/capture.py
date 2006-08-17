@@ -244,8 +244,14 @@ class CaptureApp:
         self.listbox = None
         self.ListID = []
         self.db = db
+        self.fname = u'e:\\python\\butterfly_data\\captures.xml'
     def switch_in(self):
         appuifw.app.title = u'Capture'
+
+        # create menu:
+        appuifw.app.menu = [(u'Export Captures',self.export),
+                            (u'Upload Captures',self.upload)]
+        
         # Make selection box showing all previously saved captures.
         # Display ID/Date/Time from newest to oldest.
         # Can I show a picture?
@@ -356,3 +362,46 @@ class CaptureApp:
           self.img.blit(self.screen_picture, target=(8,10, 168, 130), scale=1)
           self.canvas.blit(self.img)
 
+    def export(self):
+        # Select all from the DB.
+        # Output header
+        # <table>
+        # For each row, do:
+        #   <row>
+        #   For each field name do:
+        #     <field name="NAME">VALUE</field>
+        #   </row>
+        # </table>
+        capture_iter = Captures.select(self.db)
+        output = u''
+        output += '<table>\n'
+        try:
+            while 1:
+                captureORM = capture_iter.next()
+                output += captureORM.slog_out()
+        except StopIteration:
+            output += '</table>'
+
+        f = open(self.fname, 'w')
+        f.write(output)
+        f.close()
+        appuifw.note(u'Wrote to '+ self.fname)
+
+    def upload(self):
+        # upload to www.leninsgodson.com /courses/pys60/php/set_text.php
+        import httplib, urllib
+        url = "www.leninsgodson.com"
+        headers = {"Content-type": "application/xml"}
+        fname_handle = open(self.fname)
+        data = fname_handle.read()
+        fname_handle.close()
+        try:
+            conn = httplib.HTTPConnection(url)
+            conn.request("POST","/courses/pys60/php/set_text.php", data, headers)
+            response = conn.getresponse()
+            conn.close()
+            appuifw.note(u'Response: '+str(response.status))
+        except IOError,(errno, sterror):
+            appuifw.note(u'I/O Error(%s)' % (errno,strerror))
+            
+            
