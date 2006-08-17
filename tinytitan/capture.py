@@ -279,21 +279,21 @@ class CaptureApp:
         return
     
     def take_picture(self, captureORM):
-        screen_picture = camera.take_photo(size = (1280, 960))
-        img = Image.new((176,208))
-        canvas = appuifw.Canvas(redraw_callback=self.handle_redraw)
+        self.screen_picture = camera.take_photo(size = (1280, 960))
+        self.img = Image.new((176,208))
+        self.canvas = appuifw.Canvas(redraw_callback=self.handle_redraw)
         self.filename_prefix = u'e:\\Images\obs_'
         self.filename = u''
         old_body = appuifw.app.body
-        appuifw.app.body = canvas
+        appuifw.app.body = self.canvas
         #appuifw.app.menu =[(u"Save Image", self.save_picture)]
         appuifw.app.title = u'Image'
         self.filename = self.filename_prefix + str(int(time.time())) + u'.jpg'
         data = appuifw.query(u"Save this image to " + self.filename,"query")
         if data:
-            screen_picture.save(self.filename)
+            self.screen_picture.save(self.filename)
             captureORM.picture_filename = self.filename
-            appuifw.note(u"Saved." + self.filename, "conf")
+            appuifw.note(u"Saved." , "conf")
         self.handle_redraw(())
         appuifw.app.body = old_body
         
