@@ -14,7 +14,7 @@ db.open(u'e:\\test.db')
 
 ## Create a new Captures Table
 Q("DROP TABLE Captures")
-Q("CREATE TABLE Captures (id COUNTER, site VARCHAR, date FLOAT, time FLOAT, ima INTEGER, xcoord INTEGER, ycoord INTEGER, position VARCHAR, family VARCHAR, subfamily VARCHAR, genus VARCHAR, species VARCHAR, sex VARCHAR, recapture VARCHAR, date_of_identification FLOAT, identified_by VARCHAR, comments LONG VARCHAR)",db, dbv)
+Q("CREATE TABLE Captures (id COUNTER, site VARCHAR, date FLOAT, time FLOAT, ima INTEGER, xcoord INTEGER, ycoord INTEGER, position VARCHAR, family VARCHAR, subfamily VARCHAR, genus VARCHAR, species VARCHAR, sex VARCHAR, recapture VARCHAR, date_of_identification FLOAT, identified_by VARCHAR, comments LONG VARCHAR, picture_filename VARCHAR, audio_filename VARCHAR, specimen_code VARCHAR)",db, dbv)
 Q("CREATE UNIQUE INDEX id_index ON Captures (id)",db,dbv)
 
 ## Create a new Traps Table
@@ -22,7 +22,9 @@ Q("DROP TABLE Traps")
 Q("CREATE TABLE Traps (id COUNTER, site VARCHAR, date FLOAT, time FLOAT, ima INTEGER, xcoord INTEGER, ycoord INTEGER, position VARCHAR, date_of_first_baiting FLOAT, height FLOAT, temperature FLOAT, humidity FLOAT, wind_speed FLOAT, date_of_bait_prep FLOAT, date_of_bait_refill FLOAT, canopy_cover VARCHAR, collectors VARCHAR, comments LONG VARCHAR)",db, dbv)
 Q("CREATE UNIQUE INDEX id_index ON Traps (id)",db,dbv)
 
-## Altering a table
+
+############# YOU DON'T NEED TO RUN THIS ##################
+## Altering a table (this is just an example and not needed...)
 Q("ALTER TABLE Captures ADD picture_filename VARCHAR",db,dbv)
 Q("ALTER TABLE Captures ADD audio_filename VARCHAR",db,dbv)
 Q("ALTER TABLE Captures ADD specimen_code VARCHAR",db,dbv)
