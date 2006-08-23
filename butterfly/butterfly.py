@@ -27,6 +27,7 @@ def handle_tab(index):
     elif index == 1:
         trap_app.switch_in()
 
+
 # Create an Active object
 app_lock = e32.Ao_lock()
 # Set exit key handler

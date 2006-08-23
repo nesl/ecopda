@@ -162,7 +162,8 @@ class TrapApp:
     def switch_in(self):
         appuifw.app.title = u'Trap Device'
         appuifw.app.menu = [(u'Export Traps', self.export),
-                            (u'Upload Traps', self.upload)]
+                            (u'Upload Traps', self.upload),
+                            (u'Add barcode', self.barcode)]
         trap_iter = Traps.select(self.db, orderby='id DESC') 
         L = [u'Create New Trap']
         self.ListID = [None]
@@ -200,6 +201,17 @@ class TrapApp:
         trap.execute_form()
     def switch_out(self):
         return
+
+
+    def barcode(self):
+        barcodefile = u'e:\\mylog.txt'
+        try:
+            f = open(barcodefile)
+            result = f.read()
+            f.close()
+            appuifw.note(u'barcode: ' + result)
+        except:
+            appuifw.note(u'unable to read: ' + barcodefile)
 
     def export(self):
         trap_iter = Traps.select(self.db)
