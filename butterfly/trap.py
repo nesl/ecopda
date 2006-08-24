@@ -26,9 +26,10 @@ class Traps(orm.Mapper):
         canopy_cover = orm.column(orm.String)
         collectors = orm.column(orm.String)
         comments = orm.column(orm.String)
+        barcode = orm.column(orm.String)
         # TODO image file?
     def create_table(cls, db):
-        q = 'CREATE TABLE ' + cls.__name__ + ' '
+        q = u'CREATE TABLE ' + cls.__name__ + ' '
         q += '(id COUNTER,'
         q += 'site VARCHAR,'
         q += 'date FLOAT,'
@@ -46,14 +47,15 @@ class Traps(orm.Mapper):
         q += 'date_of_bait_refill FLOAT,'
         q += 'canopy_cover VARCHAR,'
         q += 'collectors VARCHAR,'
-        q += 'comments LONG VARCHAR)' 
+        q += 'comments LONG VARCHAR,'
+        q += 'barcode VARCHAR)'
         db.execute(q)
-        q = 'CREATE UNIQUE INDEX id_index ON '
+        q = u'CREATE UNIQUE INDEX id_index ON '
         q += cls.__name__ + ' (id)'
         db.execute(q)
     create_table = classmethod(create_table)
     def drop_table(cls, db):
-        q = 'DROP TABLE ' + cls.__name__
+        q = u'DROP TABLE ' + cls.__name__
         db.execute(q)
     drop_table = classmethod(drop_table)
 
@@ -87,7 +89,8 @@ class Trap:
             'date_of_bait_refill' : float(0),
             'canopy_cover'      : u'',
             'collectors'        : u'',
-            'comments'          : u''}
+            'comments'          : u'',
+            'barcode'           : u''}
         # Pick up anything new specified by the caller.
         self.trap_dict.update(kw)
 
@@ -112,7 +115,8 @@ class Trap:
                                                  butterfly_helper.default_combo_index(self.canopy_cover_combo,
                                                                                       self.trap_dict[u'canopy_cover']))),
                        (u'Collectors','text',self.trap_dict[u'collectors']),
-                       (u'Comments','text',self.trap_dict[u'comments'])]
+                       (u'Comments','text',self.trap_dict[u'comments']),
+                       (u'Barcode','text',self.trap_dict[u'barcode'])]
         return form_fields
     def save_hook(self, form):
         # form is the user's form.
@@ -160,10 +164,16 @@ class TrapApp:
         self.db = db
         self.fname = u'e:\\butterfly_data\\traps.xml'
     def switch_in(self):
+        try:
+            Traps.create_table(self.db)
+        except:
+            pass
+        
         appuifw.app.title = u'Trap Device'
         appuifw.app.menu = [(u'Export Traps', self.export),
                             (u'Upload Traps', self.upload),
-                            (u'Add barcode', self.barcode)]
+                            (u'Read barcode', self.barcode_start),
+                            (u'Reset Traps Table', self.reset_traps_table)]
         trap_iter = Traps.select(self.db, orderby='id DESC') 
         L = [u'Create New Trap']
         self.ListID = [None]
@@ -182,7 +192,7 @@ class TrapApp:
         if self.listbox.current() == 0:
             trap = self.new_trap()
         else:
-            pop_up_L = [u'View',u'Edit',u'Delete']
+            pop_up_L = [u'View',u'Edit', u'Apply Barcode', u'Delete']
             pop_up_index = appuifw.popup_menu(pop_up_L, u"Select Action")
             trapORM = Traps(self.db,id=self.ListID[self.listbox.current()])
             if pop_up_index == 0: # View
@@ -192,7 +202,9 @@ class TrapApp:
             elif pop_up_index == 1: # Edit
                 trap = Trap(self.db,**trapORM.dict())
                 trap.execute_form()
-            elif pop_up_index == 2: # Delete
+            elif pop_up_index == 2: # Apply Barcode
+                trapORM.set(barcode = self.barcode_read())
+            elif pop_up_index == 3: # Delete
                 trapORM.delete()
                 appuifw.note(u"Deleted.")
         self.switch_in()
@@ -202,16 +214,32 @@ class TrapApp:
     def switch_out(self):
         return
 
+    def barcode_start(self):
+        import socket
+        host = '127.0.0.1'
+        port = 80
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((host,port))
+        s.close()
 
-    def barcode(self):
+    def barcode_read(self):
         barcodefile = u'e:\\mylog.txt'
+        barcode_result = None
+        f = open(barcodefile)
         try:
-            f = open(barcodefile)
-            result = f.read()
-            f.close()
-            appuifw.note(u'barcode: ' + result)
+            barcode_result = f.read()
+            appuifw.note(u'barcode: ' + barcode_result)
         except:
             appuifw.note(u'unable to read: ' + barcodefile)
+        f.close()
+        return barcode_result
+        
+
+    def reset_traps_table(self):
+        Traps.drop_table(self.db)
+        Traps.create_table(self.db)
+        self.switch_in()
+        appuifw.note(u'Reset Traps table')
 
     def export(self):
         trap_iter = Traps.select(self.db)
