@@ -163,6 +163,8 @@ class TrapApp:
         self.ListID = []
         self.db = db
         self.fname = u'e:\\butterfly_data\\traps.xml'
+        self.selected = 0
+        #self.child_db =[]; this must be set from outside
     def switch_in(self):
         try:
             Traps.create_table(self.db)
@@ -205,6 +207,8 @@ class TrapApp:
             elif pop_up_index == 2: # Apply Barcode
                 trapORM.set(barcode = self.barcode_read())
             elif pop_up_index == 3: # Delete
+                self.child_db.mass_delete_id = trapORM.id
+                self.child_db.mass_delete_on_id()
                 trapORM.delete()
                 appuifw.note(u"Deleted.")
         self.switch_in()
@@ -212,7 +216,14 @@ class TrapApp:
         trap = Trap(self.db)
         trap.execute_form()
     def switch_out(self):
-        return
+        self.selected=self.listbox.current()
+        if (self.selected == 0):
+            return -1
+            #return -1 to select all traps, else return the id for the currently selected one
+        trapORM = Traps(self.db,id=self.ListID[self.listbox.current()])
+        #trapORM is a dictionary
+        returnval = trapORM.id
+        return returnval
 
     def barcode_start(self):
         import socket

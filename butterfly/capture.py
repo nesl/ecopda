@@ -71,7 +71,7 @@ class Captures(orm.Mapper):
 
 ### Capture Object
 class Capture:
-    def __init__(self, db, id=None, **kw):
+    def __init__(self, db, id=None, ima=0, **kw):
         self.db = db
         self.id = id
         self.form = None
@@ -88,6 +88,7 @@ class Capture:
                                 u'Other']
         self.sex_combo       = [u'F',u'M']
         self.recapture_combo = [u'N',u'Y']
+        self.ima = ima
 
         # Dict of form fields
         self.capture_dict = {
@@ -96,7 +97,7 @@ class Capture:
             'time'       : float((time.gmtime()[3] * 3600 \
                                   + time.gmtime()[4] * 60 + \
                                   + time.gmtime()[5])), # Seconds since midnight
-            'ima'       : 0, # The Array ID
+            'ima'       : self.ima, # The Array ID
             'xcoord'    : 0, # Array X coord
             'ycoord'    : 0, # Array Y coord
             'position'  : u'', # Stratum: Canopy or Understory
@@ -249,8 +250,13 @@ class CaptureApp:
         self.ListID = []
         self.db = db
         self.fname = u'e:\\butterfly_data\\captures.xml'
+        self.selection = -1
+        self.mass_delete_id = -1
     def switch_in(self):
-        appuifw.app.title = u'Capture'
+        if (self.selection != -1):
+            appuifw.app.title = unicode('Capture' + str(self.selection))
+        else:
+            appuifw.app.title = unicode('Capture all')
 
         # create menu:
         appuifw.app.menu = [(u'Export Captures',self.export),
@@ -269,7 +275,11 @@ class CaptureApp:
 
         # Fetch a list of previously saved captures:
         # TODO Try with 'id DESC'
-        capture_iter = Captures.select(self.db, orderby='id DESC') 
+#        capture_iter = Captures.select(self.db, orderby='id DESC')
+        capture_iter = Captures.select(self.db, where='ima = '+str(self.selection), orderby='id DESC') 
+        if (self.selection == -1):
+            capture_iter = Captures.select(self.db, orderby='id DESC')
+            
 
         # For each row, Add an id number to the list
         L = [u'Create New Capture']
@@ -278,7 +288,7 @@ class CaptureApp:
         try:
             while 1:
                 captureORM = capture_iter.next()
-                L.append(    #unicode(captureORM.id)
+                L.append(    #unicode(captureORM.id) +
                          u' ' + time.ctime( captureORM.date + captureORM.time )
                          + ' GMT')
                 self.ListID.append(captureORM.id) 
@@ -323,9 +333,27 @@ class CaptureApp:
                 
         # This will update the listbox
         self.switch_in()
+
+    def mass_delete_on_id(self):
+        #will have set self.mass_delete_id beforehand
+        capture_iter = Captures.select(self.db, where='ima = '+str(self.mass_delete_id), orderby='id DESC')
+        try:
+            deletelist=[]
+            while 1:
+                captureORM = capture_iter.next()
+                deletelist+=[captureORM]
+        except StopIteration:
+            pass
+        for x in deletelist:
+            appuifw.note(u"Deleting capture "+unicode(time.ctime( x.date + x.time )))
+            x.delete()
         
+
     def new_capture(self):
-        capture = Capture(self.db)
+        if (self.selection == -1):
+            capture = Capture(self.db)
+        else:
+            capture = Capture(self.db, ima=self.selection)
         capture.execute_form()
         # At this point, user has exited form.
         
