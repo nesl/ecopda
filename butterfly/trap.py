@@ -217,7 +217,7 @@ class TrapApp:
     def barcode_start(self):
         import socket
         host = '127.0.0.1'
-        port = 80
+        port = 88
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host,port))
         s.close()
@@ -257,7 +257,9 @@ class TrapApp:
         try:
             while 1:
                 trapORM = trap_iter.next()
+                output += '\t<row>\n'
                 output += trapORM.slog_out()
+                output += '\t</row>\n'
         except StopIteration:
             output += '</table>'
         f = open(self.fname, 'w')
@@ -266,21 +268,38 @@ class TrapApp:
         appuifw.note(u'Wrote to '+ self.fname)
 
     def upload(self):
-        # upload to www.leninsgodson.com /courses/pys60/php/set_text.php
         import httplib, urllib
-        url = "www.leninsgodson.com"
-        headers = {"Content-type": "application/xml"}
-        fname_handle = open(self.fname)
-        data = fname_handle.read()
-        fname_handle.close()
-        try:
-            conn = httplib.HTTPConnection(url)
-            conn.request("POST","/courses/pys60/php/set_text.php", data, headers)
-            response = conn.getresponse()
-            conn.close()
-            appuifw.note(u'Response: '+str(response.status))
-        except IOError,(errno, sterror):
-            appuifw.note(u'I/O Error(%s)' % (errno,strerror))
+
+        params = {}
+        params['email']='adparker@gmail.com'
+        params['pw']='ecopda'
+        fh = open(self.fname)
+        xml = fh.read()
+        fh.close()
+        params['data_string']= xml
+        params['type']='xml'
+        params['project_id']="24"
+        params['tableName']='Traps'
+        
+        t1 = time.time()
+        params = urllib.urlencode(params)
+        t2 = time.time()
+        
+        appuifw.note(u'URL Encode Time:' + str(((t2-t1)*1000.)))
+        
+        headers = {}
+        headers['Content-type']='application/x-www-form-urlencoded'
+        headers['Accept']='text/plain'
+
+        t1 = time.time()
+        conn = httplib.HTTPConnection("sensorbase.org")
+        conn.request("POST", "/alpha/upload.php", params, headers)
+        response = conn.getresponse()
+        responseText = response.read()
+        conn.close()
+        t2 = time.time()
+        appuifw.note(u'response: '+str(response.status) + '\n'
+                     + u'time: '+ str((t2-t1)*1000.))
 
 
 
