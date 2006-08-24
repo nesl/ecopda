@@ -222,12 +222,21 @@ class TrapApp:
         s.connect((host,port))
         s.close()
 
+    def stupid(self, barcode_result):
+        result = ""
+        for e in barcode_result:
+            if e != '\x00':
+                result += e
+        return result
+    
+
     def barcode_read(self):
         barcodefile = u'e:\\mylog.txt'
         barcode_result = None
+
         f = open(barcodefile)
         try:
-            barcode_result = f.read()
+            barcode_result = self.stupid(f.read())
             appuifw.note(u'barcode: ' + barcode_result)
         except:
             appuifw.note(u'unable to read: ' + barcodefile)
