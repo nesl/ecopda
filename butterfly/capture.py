@@ -146,8 +146,8 @@ class Capture:
                        (u'Date_of_Identification','date',self.capture_dict['date_of_identification']),
                        (u'Identified_By','text',self.capture_dict['identified_by']),
                        (u'Comments','text',self.capture_dict[u'comments']),
-                       (u'Picture Filename','text',self.capture_dict[u'picture_filename']),
-                       (u'Audio Filename','text',self.capture_dict[u'audio_filename'])]
+                       (u'Picture_Filename','text',self.capture_dict[u'picture_filename']),
+                       (u'Audio_Filename','text',self.capture_dict[u'audio_filename'])]
         return form_fields
 
     def save_hook(self, form_list):
