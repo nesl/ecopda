@@ -197,7 +197,14 @@ class TrapApp:
         self.selected = 0
         self.viewby = 'id Desc'
         self.child_db =[] # this must be set from outside
-        
+    def view(self, column, orderby=''):
+        #self.viewby = column + orderby
+        #self.switch_in()
+        return
+    def number_of_traps(self):
+        return
+    def ave_captures_per_trap(self):
+        return
     def switch_in(self):
         try:
             Traps.create_table(self.db)
@@ -210,12 +217,12 @@ class TrapApp:
              (u'Reset Traps Table', self.reset_traps_table)]),
            (u'Delete Row', self.delete_row),
            (u'View',
-            [u'Date',
+            [(u'Date',
              [(u'Latest', self.view(column='date', orderby='DESC')),
-              (u'Earliest', self.view(column='date',orderby='ASC'))]],
-            [u'IMA',
+              (u'Earliest', self.view(column='date',orderby='ASC'))])],
+            [(u'IMA',
              [(u'Ascending', self.view(column='ima', orderby='ASC')),
-              (u'Descending', self.view(column='ima', orderby='DESC'))]],
+              (u'Descending', self.view(column='ima', orderby='DESC'))])],
             [u'SITE',
              [(u'Alphabetical', self.view(column='site',orderby='ASC')),
               (u'Reverse Alpha', self.view(column='site',orderby='DESC'))]]),
@@ -236,6 +243,8 @@ class TrapApp:
                     L.append(unicode(trapORM.id))
                 elif (-1 < string.find(self.viewby, 'ima')):
                     L.append(unicode(trapORM.ima))
+                elif (-1 < string.find(self.viewby, 'site')):
+                    L.append(unicode(trapORM.site))
                 else:
                     L.append(u'bug, invalid view type')
                 self.ListID.append(trapORM.id) 
@@ -243,7 +252,17 @@ class TrapApp:
             pass
         self.listbox = appuifw.Listbox(L,self.lb_callback)
         appuifw.app.body = self.listbox
-        
+    
+    def delete_row(self):
+        if (self.listbox.current() == 0):
+            return
+        else:
+            trapORM = Traps(self.db,id=self.ListID[self.listbox.current()])
+            self.child_db.mass_delete_id = trapORM.id
+            self.child_db.mass_delete_on_id()
+            trapORM.delete()
+            appuifw.note(u"Deleted.")
+
     def lb_callback(self):
         if self.listbox.current() == 0:
             trap = self.new_trap()

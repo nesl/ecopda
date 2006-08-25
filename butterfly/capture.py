@@ -258,6 +258,13 @@ class CaptureApp:
     def show_orphans(self):
         self.selection = -2
         self.switch_in()
+    def view(self, column, orderby=''):
+        self.viewby = column + orderby
+        self.switch_in()
+    def number_of_traps(self):
+        return
+    def ave_captures_per_trap(self):
+        return
     def switch_in(self):
         try:
             Captures.create_table(self.db)
@@ -280,15 +287,15 @@ class CaptureApp:
              (u'Reset Captures Table', self.reset_captures_table)]),
            (u'Delete Row', self.delete_row),
            (u'View',
-            [u'Date',
+            [(u'Date',
              [(u'Latest', self.view(column='date', orderby='DESC')),
-              (u'Earliest', self.view(column='date',orderby='ASC'))]],
-            [u'IMA',
+              (u'Earliest', self.view(column='date',orderby='ASC'))])],
+            [(u'IMA',
              [(u'Ascending', self.view(column='ima', orderby='ASC')),
-              (u'Descending', self.view(column='ima', orderby='DESC'))]],
-            [u'SITE',
+              (u'Descending', self.view(column='ima', orderby='DESC'))])],
+            [(u'SITE',
              [(u'Alphabetical', self.view(column='site',orderby='ASC')),
-              (u'Reverse Alpha', self.view(column='site',orderby='DESC'))]]),
+              (u'Reverse Alpha', self.view(column='site',orderby='DESC'))])],
            (u'Statistics',
             [(u'Number of Captures', self.number_of_traps),
              (u'Average Captures per Trap', self.ave_captures_per_trap)])]
@@ -329,6 +336,10 @@ class CaptureApp:
                          + ' GMT')
                 elif (-1 < string.find(self.viewby, 'id')):
                     L.append( unicode(captureORM.id) )
+                elif (-1 < string.find(self.viewby, 'ima')):
+                    L.append( unicode(captureORM.ima) )
+                elif (-1 < string.find(self.viewby, 'site')):
+                    L.append( unicode(captureORM.site) )
                 elif (-1 < string.find(self.viewby, 'type') ):
                     L.append( unicode(captureORM.family_combo) + u': ' + unicode(captureORM.subfamily_combo) )
                 else:
@@ -346,7 +357,15 @@ class CaptureApp:
         Captures.create_table(self.db)
         self.switch_in()
         appuifw.note(u'Reset Captures table')
-        
+    
+    def delete_row(self):
+        if (self.listbox.current() == 0):
+            return
+        else:
+            captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
+            captureORM.delete()
+            appuifw.note(u"Deleted")
+    
     def lb_callback(self):
         # If index is == 0, then give the use a new form:
         if self.listbox.current() == 0:
