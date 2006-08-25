@@ -43,6 +43,8 @@ appuifw.app.set_tabs([u'Trap', u'Capture'], handle_tab)
 capture_app = capture.CaptureApp(db)
 trap_app = trap.TrapApp(db)
 trap_app.child_db=capture_app
+capture_app.parent_db=trap_app.db
+
 
 # Set app.body to app1 (for start of script)
 handle_tab(0)
