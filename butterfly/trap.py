@@ -197,12 +197,16 @@ class TrapApp:
         self.selected = 0
         self.viewby = 'id Desc'
         self.child_db =[] # this must be set from outside
+        self.dbv = e32db.Db_view()
     def view(self, column, orderby=''):
         self.viewby = column + orderby
         self.switch_in()
         return
     def number_of_traps(self):
-        return
+        #try to calculate the number of rows in the db
+        self.dbv.prepare(self.db, u'SELECT * from Traps')
+        numrows=self.dbv.count_line()
+        appuifw.note(u'# of Traps: ' + unicode(numrows))        
     def ave_captures_per_trap(self):
         return
     def switch_in(self):
