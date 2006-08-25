@@ -1,6 +1,7 @@
 import appuifw
 import e32
 import time
+import string
 
 import sys
 sys.path.append('e:\\python') #to properly find orm and keyboard
@@ -250,18 +251,27 @@ class CaptureApp:
         self.ListID = []
         self.db = db
         self.fname = u'e:\\butterfly_data\\captures.xml'
-        self.selection = -1
+        self.selection = -1 # -1 for all -2 for orphans
         self.mass_delete_id = -1
-        
+        self.parent_db = []
+        self.viewby = 'date DESC'
+    def show_orphans(self):
+        self.selection = -2
+        self.switch_in()
     def switch_in(self):
         try:
             Captures.create_table(self.db)
         except:
             pass
-        if (self.selection != -1):
-            appuifw.app.title = unicode('Capture' + str(self.selection))
+        titlestr= u''
+        if (self.selection == -1):
+            titlestr = unicode('All')
+        elif (self.selection == -2):
+            titlestr = unicode('Orphans')
         else:
-            appuifw.app.title = unicode('Capture all')
+            titlestr = unicode(str(self.selection) + ':')
+        titlestr += unicode(' View: '+self.viewby)
+        appuifw.app.title = titlestr
 
         # create menu:
         appuifw.app.menu = [(u'Table',
@@ -284,7 +294,8 @@ class CaptureApp:
              (u'Average Captures per Trap', self.ave_captures_per_trap)])]
 
         appuifw.app.menu = [(u'Export Captures',self.export),
-                            (u'Upload Captures',self.upload)]
+                            (u'Upload Captures',self.upload),
+                            (u'Show Orphans',self.show_orphans)]
         
         # Make selection box showing all previously saved captures.
         # Display ID/Date/Time from newest to oldest.
@@ -303,6 +314,8 @@ class CaptureApp:
         capture_iter = Captures.select(self.db, where='ima = '+str(self.selection), orderby='id DESC') 
         if (self.selection == -1):
             capture_iter = Captures.select(self.db, orderby='id DESC')
+        if (self.selection == -2):
+            capture_iter = Captures.select(self.db, where='(ima <> 1 AND ima <> 0)' )
         # For each row, Add an id number to the list
         L = [u'Create New Capture']
         self.ListID = [None]
@@ -310,9 +323,16 @@ class CaptureApp:
         try:
             while 1:
                 captureORM = capture_iter.next()
-                L.append(    #unicode(captureORM.id) +
+                if (-1 < string.find(self.viewby, 'date')):
+                    L.append(    #unicode(captureORM.id) +
                          u' ' + time.ctime( captureORM.date + captureORM.time )
                          + ' GMT')
+                elif (-1 < string.find(self.viewby, 'id')):
+                    L.append( unicode(captureORM.id) )
+                elif (-1 < string.find(self.viewby, 'type') ):
+                    L.append( unicode(captureORM.family_combo) + u': ' + unicode(captureORM.subfamily_combo) )
+                else:
+                    L.append(u'bug, invalid viewby type')  
                 self.ListID.append(captureORM.id) 
         except StopIteration:
             pass
