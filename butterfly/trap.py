@@ -198,8 +198,8 @@ class TrapApp:
         self.viewby = 'id Desc'
         self.child_db =[] # this must be set from outside
     def view(self, column, orderby=''):
-        #self.viewby = column + orderby
-        #self.switch_in()
+        self.viewby = column + orderby
+        self.switch_in()
         return
     def number_of_traps(self):
         return
@@ -212,23 +212,17 @@ class TrapApp:
             pass
         appuifw.app.title = u'View: '+unicode(self.viewby)
         appuifw.app.menu = [(u'Table',
-            [(u'Export Traps', self.export),
-             (u'Upload Traps', self.upload),
-             (u'Reset Traps Table', self.reset_traps_table)]),
-           (u'Delete Row', self.delete_row),
-           (u'View',
-            [(u'Date',
-             [(u'Latest', self.view(column='date', orderby='DESC')),
-              (u'Earliest', self.view(column='date',orderby='ASC'))])],
-            [(u'IMA',
-             [(u'Ascending', self.view(column='ima', orderby='ASC')),
-              (u'Descending', self.view(column='ima', orderby='DESC'))])],
-            [u'SITE',
-             [(u'Alphabetical', self.view(column='site',orderby='ASC')),
-              (u'Reverse Alpha', self.view(column='site',orderby='DESC'))]]),
-           (u'Statistics',
-            [(u'Number of Traps', self.number_of_traps),
-             (u'Average Captures per Trap', self.ave_captures_per_trap)])]
+                             ((u'Export Traps', self.export),
+                              (u'Upload Traps', self.upload),
+                              (u'Reset Traps Table', self.reset_traps_table))),
+                            (u'Delete Row', self.delete_row),
+                            (u'View',
+                             ((u'Date',lambda x = None: self.view(column='date', orderby='DESC')),
+                              (u'IMA',lambda x = None: self.view(column='ima', orderby='DESC')),
+                              (u'SITE',lambda x = None: self.view(column='site', orderby='DESC')))),
+                            (u'Statistics',
+                             ((u'Number of Traps', self.number_of_traps),
+                              (u'Average Captures per Trap', self.ave_captures_per_trap)))]
         trap_iter = Traps.select(self.db, orderby='id DESC') 
         L = [u'New Trap / Show all']
         self.ListID = [None]
@@ -262,19 +256,15 @@ class TrapApp:
             self.child_db.mass_delete_on_id()
             trapORM.delete()
             appuifw.note(u"Deleted.")
+            self.switch_in()
 
     def lb_callback(self):
         if self.listbox.current() == 0:
             trap = self.new_trap()
         else:
             trapORM = Traps(self.db,id=self.ListID[self.listbox.current()])
-            if pop_up_index == 0: # View
-                trap = Trap(self.db,**trapORM.dict())
-                trap.execute_form(appuifw.FFormViewModeOnly
-                                    + appuifw.FFormDoubleSpaced)
-            elif pop_up_index == 1: # Edit
-                  trap = Trap(self.db,**trapORM.dict())
-                  trap.execute_form()
+            trap = Trap(self.db,**trapORM.dict())
+            trap.execute_form()
 #           elif pop_up_index == 2: # Apply Barcode
 #                 trapORM.set(barcode = self.barcode_read())
 #           elif pop_up_index == 3: # Delete

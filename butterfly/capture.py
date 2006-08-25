@@ -282,27 +282,18 @@ class CaptureApp:
 
         # create menu:
         appuifw.app.menu = [(u'Table',
-            [(u'Export Captures', self.export),
-             (u'Upload Captures', self.upload),
-             (u'Reset Captures Table', self.reset_captures_table)]),
-           (u'Delete Row', self.delete_row),
-           (u'View',
-            [(u'Date',
-             [(u'Latest', self.view(column='date', orderby='DESC')),
-              (u'Earliest', self.view(column='date',orderby='ASC'))])],
-            [(u'IMA',
-             [(u'Ascending', self.view(column='ima', orderby='ASC')),
-              (u'Descending', self.view(column='ima', orderby='DESC'))])],
-            [(u'SITE',
-             [(u'Alphabetical', self.view(column='site',orderby='ASC')),
-              (u'Reverse Alpha', self.view(column='site',orderby='DESC'))])],
-           (u'Statistics',
-            [(u'Number of Captures', self.number_of_traps),
-             (u'Average Captures per Trap', self.ave_captures_per_trap)])]
-
-        appuifw.app.menu = [(u'Export Captures',self.export),
-                            (u'Upload Captures',self.upload),
-                            (u'Show Orphans',self.show_orphans)]
+                             ((u'Export Captures', self.export),
+                              (u'Upload Captures', self.upload),
+                              (u'Reset Captures Table', self.reset_captures_table))),
+                            (u'Delete Row', self.delete_row),
+                            (u'View',
+                             ((u'Date',lambda x = None: self.view(column='date', orderby='DESC')),
+                              (u'IMA',lambda x = None: self.view(column='ima', orderby='DESC')),
+                              (u'SITE',lambda x = None: self.view(column='site', orderby='DESC')))),
+                            (u'Statistics',
+                             ((u'Number of Captures', self.number_of_traps),
+                              (u'Average Captures per Trap', self.ave_captures_per_trap)))]
+        
         
         # Make selection box showing all previously saved captures.
         # Display ID/Date/Time from newest to oldest.
@@ -365,7 +356,8 @@ class CaptureApp:
             captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
             captureORM.delete()
             appuifw.note(u"Deleted")
-    
+            self.switch_in()
+            
     def lb_callback(self):
         # If index is == 0, then give the use a new form:
         if self.listbox.current() == 0:
