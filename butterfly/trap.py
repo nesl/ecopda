@@ -27,7 +27,6 @@ class Traps(orm.Mapper):
         collectors = orm.column(orm.String)
         comments = orm.column(orm.String)
         barcode = orm.column(orm.String)
-        # TODO image file?
     def create_table(cls, db):
         q = u'CREATE TABLE ' + cls.__name__ + ' '
         q += '(id COUNTER,'

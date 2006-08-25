@@ -37,7 +37,7 @@ class Captures(orm.Mapper):
         picture_filename = orm.column(orm.String)
         audio_filename = orm.column(orm.String)
     def create_table(cls, db):
-        q = 'CREATE TABLE ' + cls.__name__ + ' '
+        q = u'CREATE TABLE ' + cls.__name__ + ' '
         q += '(id COUNTER,'
         q += 'site VARCHAR,'
         q += 'date FLOAT,'
@@ -59,12 +59,12 @@ class Captures(orm.Mapper):
         q += 'picture_filename VARCHAR,'
         q += 'audio_filename VARCHAR)'
         db.execute(q)
-        q = 'CREATE UNIQUE INDEX id_index ON '
+        q = u'CREATE UNIQUE INDEX id_index ON '
         q += cls.__name__ + ' (id)'
         db.execute(q)
     create_table = classmethod(create_table)
     def drop_table(cls, db):
-        q = 'DROP TABLE ' + cls.__name__
+        q = u'DROP TABLE ' + cls.__name__
         db.execute(q)
     drop_table = classmethod(drop_table)
     
@@ -252,13 +252,37 @@ class CaptureApp:
         self.fname = u'e:\\butterfly_data\\captures.xml'
         self.selection = -1
         self.mass_delete_id = -1
+        
     def switch_in(self):
+        try:
+            Captures.create_table(self.db)
+        except:
+            pass
         if (self.selection != -1):
             appuifw.app.title = unicode('Capture' + str(self.selection))
         else:
             appuifw.app.title = unicode('Capture all')
 
         # create menu:
+        appuifw.app.menu = [(u'Table',
+            [(u'Export Captures', self.export),
+             (u'Upload Captures', self.upload),
+             (u'Reset Captures Table', self.reset_captures_table)]),
+           (u'Delete Row', self.delete_row),
+           (u'View',
+            [u'Date',
+             [(u'Latest', self.view(column='date', orderby='DESC')),
+              (u'Earliest', self.view(column='date',orderby='ASC'))]],
+            [u'IMA',
+             [(u'Ascending', self.view(column='ima', orderby='ASC')),
+              (u'Descending', self.view(column='ima', orderby='DESC'))]],
+            [u'SITE',
+             [(u'Alphabetical', self.view(column='site',orderby='ASC')),
+              (u'Reverse Alpha', self.view(column='site',orderby='DESC'))]]),
+           (u'Statistics',
+            [(u'Number of Captures', self.number_of_traps),
+             (u'Average Captures per Trap', self.ave_captures_per_trap)])]
+
         appuifw.app.menu = [(u'Export Captures',self.export),
                             (u'Upload Captures',self.upload)]
         
@@ -279,8 +303,6 @@ class CaptureApp:
         capture_iter = Captures.select(self.db, where='ima = '+str(self.selection), orderby='id DESC') 
         if (self.selection == -1):
             capture_iter = Captures.select(self.db, orderby='id DESC')
-            
-
         # For each row, Add an id number to the list
         L = [u'Create New Capture']
         self.ListID = [None]
@@ -294,11 +316,16 @@ class CaptureApp:
                 self.ListID.append(captureORM.id) 
         except StopIteration:
             pass
-
         # Create the Listbox
         self.listbox = appuifw.Listbox(L,self.lb_callback)
         # Show it
         appuifw.app.body = self.listbox
+
+    def reset_captures_table(self):
+        Captures.drop_table(self.db)
+        Captures.create_table(self.db)
+        self.switch_in()
+        appuifw.note(u'Reset Captures table')
         
     def lb_callback(self):
         # If index is == 0, then give the use a new form:
@@ -309,27 +336,22 @@ class CaptureApp:
             # Create a popup selection box that asks for
             # VIEW, EDIT, DELETE
             # TODO
-            pop_up_L = [u'View',u'Edit',u'Delete', u'Take Picture', u'Audio Options']
-            pop_up_index = appuifw.popup_menu(pop_up_L, u"Select Action")
+#             pop_up_L = [u'View',u'Edit',u'Delete', u'Take Picture', u'Audio Options']
+#             pop_up_index = appuifw.popup_menu(pop_up_L, u"Select Action")
             captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
-            if pop_up_index == 0: # View
-                capture = Capture(self.db,**captureORM.dict())
-                capture.execute_form(appuifw.FFormViewModeOnly
-                                    + appuifw.FFormDoubleSpaced)
-            elif pop_up_index == 1: # Edit
-                # Create a new form instantiated
-                # capturesORM with that ID.
-                capture = Capture(self.db,**captureORM.dict())
-                capture.execute_form()
-            elif pop_up_index == 2: # Delete
-                # are you sure you want to delete blah?
-                # TODO
-                captureORM.delete()
-                appuifw.note(u"Deleted.")
-            elif pop_up_index == 3: # Take Picture
-                self.take_picture(captureORM)
-            elif pop_up_index == 4: # Take Audio
-                self.audio_options(captureORM)
+            # Create a new form instantiated
+            # capturesORM with that ID.
+            capture = Capture(self.db,**captureORM.dict())
+            capture.execute_form()
+#             elif pop_up_index == 2: # Delete
+#                 # are you sure you want to delete blah?
+#                 # TODO
+#                 captureORM.delete()
+#                 appuifw.note(u"Deleted.")
+#             elif pop_up_index == 3: # Take Picture
+#                 self.take_picture(captureORM)
+#             elif pop_up_index == 4: # Take Audio
+#                 self.audio_options(captureORM)
                 
         # This will update the listbox
         self.switch_in()
