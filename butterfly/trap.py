@@ -5,6 +5,7 @@ import time
 import butterfly_helper
 import orm
 import keyboard
+import string
 
 # This is the ORM to the table 'Traps'
 class Traps(orm.Mapper):
@@ -194,13 +195,15 @@ class TrapApp:
         self.db = db
         self.fname = u'e:\\butterfly_data\\traps.xml'
         self.selected = 0
+        self.viewby = 'id Desc'
+        self.child_db =[] # this must be set from outside
         
     def switch_in(self):
         try:
             Traps.create_table(self.db)
         except:
             pass
-        appuifw.app.title = u'Trap Device'
+        appuifw.app.title = u'View: '+unicode(self.viewby)
         appuifw.app.menu = [(u'Table',
             [(u'Export Traps', self.export),
              (u'Upload Traps', self.upload),
@@ -220,14 +223,21 @@ class TrapApp:
             [(u'Number of Traps', self.number_of_traps),
              (u'Average Captures per Trap', self.ave_captures_per_trap)])]
         trap_iter = Traps.select(self.db, orderby='id DESC') 
-        L = [u'Create New Trap']
+        L = [u'New Trap / Show all']
         self.ListID = [None]
         try:
             while 1:
                 trapORM = trap_iter.next()
-                L.append(    #unicode(trapORM.id)
+                if (-1 < string.find(self.viewby, 'date')):
+                    L.append(    #unicode(trapORM.id)
                          u' ' + time.ctime( trapORM.date + trapORM.time )
                          + ' GMT')
+                elif (-1 < string.find(self.viewby, 'id')):
+                    L.append(unicode(trapORM.id))
+                elif (-1 < string.find(self.viewby, 'ima')):
+                    L.append(unicode(trapORM.ima))
+                else:
+                    L.append(u'bug, invalid view type')
                 self.ListID.append(trapORM.id) 
         except StopIteration:
             pass
@@ -239,11 +249,16 @@ class TrapApp:
             trap = self.new_trap()
         else:
             trapORM = Traps(self.db,id=self.ListID[self.listbox.current()])
-            trap = Trap(self.db,**trapORM.dict())
-            trap.execute_form()
-#             elif pop_up_index == 2: # Apply Barcode
+            if pop_up_index == 0: # View
+                trap = Trap(self.db,**trapORM.dict())
+                trap.execute_form(appuifw.FFormViewModeOnly
+                                    + appuifw.FFormDoubleSpaced)
+            elif pop_up_index == 1: # Edit
+                  trap = Trap(self.db,**trapORM.dict())
+                  trap.execute_form()
+#           elif pop_up_index == 2: # Apply Barcode
 #                 trapORM.set(barcode = self.barcode_read())
-#             elif pop_up_index == 3: # Delete
+#           elif pop_up_index == 3: # Delete
 #                 self.child_db.mass_delete_id = trapORM.id
 #                 self.child_db.mass_delete_on_id()
 #                 trapORM.delete()
