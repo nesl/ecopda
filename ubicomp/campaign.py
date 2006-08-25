@@ -149,7 +149,7 @@ def get_image():
   imageScreen = appuifw.Text()
   imageScreen.add(u'Hi ' + user_name + ',\n')
   imageScreen.add(u'  Great job collecting that information.')
-  imageScreen.add(u' Now please take a representative image of the demo.')
+  imageScreen.add(u' Now please take a representative image of the demo that shows its uniqueness or value.')
   imageScreen.add(u'\n\nPress and hold the camera button to start capture.')
   image_dir = dir_iter.Directory_iter([u'e:\\Images',])
   image_dir.add(0)
@@ -276,6 +276,7 @@ def init_app(name = None):
   else:
     intro = u'Welcome back, ' + user_name + u'.'
   intro += u' Today, our campaign is to document other Ubicomp demos.'
+  intro += u' Your input will be used to find the best demos, most popular demos, and document comments about each demo.'
   cont = u'Press the center joystick button to start.'
   
   textScreen = appuifw.Text()
