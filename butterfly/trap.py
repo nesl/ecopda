@@ -59,12 +59,22 @@ class Traps(orm.Mapper):
         db.execute(q)
     drop_table = classmethod(drop_table)
 
+def barcode_start():
+    import socket
+    host = '127.0.0.1'
+    port = 88
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((host,port))
+    s.close()
+
+
         
 ### Trap Object
 class Trap:
     def __init__(self, db, id=None, **kw):
         self.db = db
         self.id = id
+        self.form = None
         # Combos:
         self.position_combo  = [u'U',u'C']
         self.canopy_cover_combo = [u'Closed/semi-closed',
@@ -121,7 +131,8 @@ class Trap:
     def save_hook(self, form):
         # form is the user's form.
         # Has the structure [(u'field_name','type','data'), ... ]
-        for i in form:
+        self.form = form
+        for i in self.form:
             field_name = str(i[0]).lower()
             field_val = None
             if (i[1] != 'combo'):
@@ -149,14 +160,34 @@ class Trap:
             flags = appuifw.FFormEditModeOnly + appuifw.FFormDoubleSpaced
         form_fields = self.create_form_fields()
         # Creates the form
-        form = appuifw.Form(form_fields, flags)
-        form.save_hook = self.save_hook
-        return form
+        self.form = appuifw.Form(form_fields, flags)
+        self.form.save_hook = self.save_hook
+        self.form.menu = [(u'Launch Barcode Reader', barcode_start),
+                          (u'Accept Barcode', self.barcode_read)]
+
 
     def execute_form(self, flags = None):
-        form = self.create_form(flags)
-        form.execute()
+        self.create_form(flags)
+        self.form.execute()
 
+    def barcode_read(self):
+        barcodefile = u'e:\\mylog.txt'
+        barcode_result = u''
+        f = open(barcodefile)
+        try:
+            barcode_result = self.stupid(f.read())
+            appuifw.note(u'barcode: ' + barcode_result)
+        except:
+            appuifw.note(u'unable to read: ' + barcodefile)
+        f.close()
+        # need to modify self.form
+        titles = [title for (title,type,value) in self.form]
+        barcode_index = butterfly_helper.find_index_of_matching(titles, 'Barcode')
+        if barcode_index is not -1:
+            self.form[barcode_index] = (u'Barcode',
+                                        u'text',
+                                        unicode(barcode_result))
+        
 class TrapApp:
     def __init__(self,db):
         self.listbox = None
@@ -164,18 +195,31 @@ class TrapApp:
         self.db = db
         self.fname = u'e:\\butterfly_data\\traps.xml'
         self.selected = 0
-        #self.child_db =[]; this must be set from outside
+        
     def switch_in(self):
         try:
             Traps.create_table(self.db)
         except:
             pass
-        
         appuifw.app.title = u'Trap Device'
-        appuifw.app.menu = [(u'Export Traps', self.export),
-                            (u'Upload Traps', self.upload),
-                            (u'Read barcode', self.barcode_start),
-                            (u'Reset Traps Table', self.reset_traps_table)]
+        appuifw.app.menu = [(u'Table',
+            [(u'Export Traps', self.export),
+             (u'Upload Traps', self.upload),
+             (u'Reset Traps Table', self.reset_traps_table)]),
+           (u'Delete Row', self.delete_row),
+           (u'View',
+            [u'Date',
+             [(u'Latest', self.view(column='date', orderby='DESC')),
+              (u'Earliest', self.view(column='date',orderby='ASC'))]],
+            [u'IMA',
+             [(u'Ascending', self.view(column='ima', orderby='ASC')),
+              (u'Descending', self.view(column='ima', orderby='DESC'))]],
+            [u'SITE',
+             [(u'Alphabetical', self.view(column='site',orderby='ASC')),
+              (u'Reverse Alpha', self.view(column='site',orderby='DESC'))]]),
+           (u'Statistics',
+            [(u'Number of Traps', self.number_of_traps),
+             (u'Average Captures per Trap', self.ave_captures_per_trap)])]
         trap_iter = Traps.select(self.db, orderby='id DESC') 
         L = [u'Create New Trap']
         self.ListID = [None]
@@ -190,27 +234,21 @@ class TrapApp:
             pass
         self.listbox = appuifw.Listbox(L,self.lb_callback)
         appuifw.app.body = self.listbox
+        
     def lb_callback(self):
         if self.listbox.current() == 0:
             trap = self.new_trap()
         else:
-            pop_up_L = [u'View',u'Edit', u'Apply Barcode', u'Delete']
-            pop_up_index = appuifw.popup_menu(pop_up_L, u"Select Action")
             trapORM = Traps(self.db,id=self.ListID[self.listbox.current()])
-            if pop_up_index == 0: # View
-                trap = Trap(self.db,**trapORM.dict())
-                trap.execute_form(appuifw.FFormViewModeOnly
-                                    + appuifw.FFormDoubleSpaced)
-            elif pop_up_index == 1: # Edit
-                trap = Trap(self.db,**trapORM.dict())
-                trap.execute_form()
-            elif pop_up_index == 2: # Apply Barcode
-                trapORM.set(barcode = self.barcode_read())
-            elif pop_up_index == 3: # Delete
-                self.child_db.mass_delete_id = trapORM.id
-                self.child_db.mass_delete_on_id()
-                trapORM.delete()
-                appuifw.note(u"Deleted.")
+            trap = Trap(self.db,**trapORM.dict())
+            trap.execute_form()
+#             elif pop_up_index == 2: # Apply Barcode
+#                 trapORM.set(barcode = self.barcode_read())
+#             elif pop_up_index == 3: # Delete
+#                 self.child_db.mass_delete_id = trapORM.id
+#                 self.child_db.mass_delete_on_id()
+#                 trapORM.delete()
+#                 appuifw.note(u"Deleted.")
         self.switch_in()
     def new_trap(self):
         trap = Trap(self.db)
@@ -224,14 +262,6 @@ class TrapApp:
         #trapORM is a dictionary
         returnval = trapORM.id
         return returnval
-
-    def barcode_start(self):
-        import socket
-        host = '127.0.0.1'
-        port = 88
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((host,port))
-        s.close()
 
     def stupid(self, barcode_result):
         result = ""
