@@ -24,7 +24,7 @@ class SiteImaApp:
         L = []
         self.ListID = []
         dict_sites = {} # keeps track of "sites" we've seen. Chris doesn't like this. :P
-        trapconfig_iter = TrapsConfig.select(self.db, orderby='id DESC')
+        trapconfig_iter = TrapsConfig.select(self.db, orderby='id ASC')
         try:
             while 1:
                 trapconfigORM = trapconfig_iter.next()

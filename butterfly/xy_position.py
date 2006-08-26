@@ -25,8 +25,8 @@ class XYPositionApp:
         L = []
         self.ListID = []
         where_query = u'(site=' + self.parent_dict['site'] 
-        where_query += 'AND ima=' + self.parent_dict['ima'] + ')'
-        trapconfig_iter = TrapsConfig.select(self.db, where=where_query ,orderby=' DESC')
+        where_query += 'AND ima=' + str(self.parent_dict['ima']) + ')'
+        trapconfig_iter = TrapsConfig.select(self.db, where=where_query ,orderby='id DESC')
         try:
             while 1:
                 trapconfigORM = trapconfig_iter.next()
