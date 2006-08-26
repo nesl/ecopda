@@ -30,9 +30,9 @@ class XYPositionApp:
         try:
             while 1:
                 trapconfigORM = trapconfig_iter.next()
-                L.append(unicode(trapconfigORM.xcoord
-                                 p)
-                         + ':' + unicode(trapconfigORM.ima))
+                L.append(unicode(trapconfigORM.xcoord)
+                         + '/' + unicode(trapconfigORM.ycoord)
+                         + ':' + unicode(trapconfigORM.position))
                 self.ListID.append(trapconfigORM.id)
         except StopIteration:
             pass

@@ -23,13 +23,16 @@ class SiteImaApp:
         appuifw.app.menu = []
         L = []
         self.ListID = []
+        dict_sites = {} # keeps track of "sites" we've seen. Chris doesn't like this. :P
         trapconfig_iter = TrapsConfig.select(self.db, orderby='id DESC')
         try:
             while 1:
                 trapconfigORM = trapconfig_iter.next()
-                L.append(unicode(trapconfigORM.site)
-                         + ':' + unicode(trapconfigORM.ima))
-                self.ListID.append(trapconfigORM.id)
+                site_name = unicode(trapconfigORM.site) + ':' + unicode(trapconfigORM.ima)
+                if site_name not in dict_sites:
+                    L.append(site_name)
+                    self.ListID.append(trapconfigORM.id)
+                    dict_sites[site_name] = 1
         except StopIteration:
             pass
         self.listbox = appuifw.Listbox(L,self.lb_callback)

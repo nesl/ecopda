@@ -21,6 +21,10 @@ butterflydb.TrapsPopulate()
 db = e32db.Dbms()
 db.open(u'e:\\test.db')
 
+positions_db = e32db.Dbms()
+# butterflydb.TrapsPopulate needs to be called before the open
+positions_db.open(u'e:\\trapsconfig.db')
+
 ######################
 ### Main part of application
 
@@ -81,8 +85,8 @@ capture_app = capture.CaptureApp(db)
 trap_app = trap.TrapApp(db)
 trap_app.child_db=capture_app
 capture_app.parent_db=trap_app.db
-site_map_app = site_ima.SiteImaApp(db)
-xy_position_app = xy_position.XYPositionApp(db)
+site_ima_app = site_ima.SiteImaApp(positions_db)
+xy_position_app = xy_position.XYPositionApp(positions_db)
 
 # Set app.body to app1 (for start of script)
 handle_tab(0)
