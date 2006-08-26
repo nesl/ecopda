@@ -116,7 +116,7 @@ class TrapsConfig(orm.Mapper):
         ycoord = orm.column(orm.Integer)
         position = orm.column(orm.String)
     def create_table(cls,db):
-        q = u'CREATE TABLE ' + cls.__name + ''
+        q = u'CREATE TABLE ' + cls.__name__ + ''
         q += '(id COUNTER,'
         q += 'site VARCHAR,'
         q += 'ima INTEGER,'
@@ -132,12 +132,16 @@ class TrapsConfig(orm.Mapper):
 
 def TrapsPopulate():
     db = e32db.Dbms()
-    db.open(u'e:\\trapsconfig.db')
+    fn = u'e:\\trapsconfig.db'
     try:
-        db.create()
+        db.create(fn)
     except:
         pass
-    TrapsConfig.drop_table(db)
+    db.open(fn)
+    try:
+        TrapsConfig.drop_table(db)
+    except:
+        pass
     TrapsConfig.create_table(db)
     for site in ['BRA']:
         for ima in range(0,6):
@@ -149,5 +153,5 @@ def TrapsPopulate():
                                   'xcoord':xcoord,
                                   'ycoord':ycoord,
                                   'position':position}
-                        trapsconfigORM = TransConfig(db,**mydict)
+                        trapsconfigORM = TrapsConfig(db,**mydict)
     

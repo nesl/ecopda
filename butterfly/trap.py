@@ -3,7 +3,7 @@ import e32
 import e32db
 import time
 import butterfly_helper
-import butterflydb
+from butterflydb import *
 import orm
 import keyboard
 import string

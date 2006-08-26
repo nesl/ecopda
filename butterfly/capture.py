@@ -6,7 +6,7 @@ import string
 import sys
 sys.path.append('e:\\python') #to properly find orm and keyboard
 import butterfly_helper
-import butterflydb
+from butterflydb import *
 import orm
 import keyboard
 import e32db
