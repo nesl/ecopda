@@ -6,6 +6,7 @@ import string
 import sys
 sys.path.append('e:\\python') #to properly find orm and keyboard
 import butterfly_helper
+import butterflydb
 import orm
 import keyboard
 import e32db
@@ -16,58 +17,58 @@ from graphics import *
 import audio
 
 # This is the ORM to the table 'Captures'
-class Captures(orm.Mapper):
-    class mapping:
-        site = orm.column(orm.String)
-        date = orm.column(orm.Float) # try this with TIMESTAMP later?
-        time = orm.column(orm.Float) # try this with TIMESTAMP later?
-        ima = orm.column(orm.Integer)
-        xcoord = orm.column(orm.Integer)
-        ycoord = orm.column(orm.Integer)
-        position = orm.column(orm.String)
-        specimen_code = orm.column(orm.String)
-        family = orm.column(orm.String)
-        subfamily = orm.column(orm.String)
-        genus = orm.column(orm.String)
-        species = orm.column(orm.String)
-        sex = orm.column(orm.String)
-        recapture = orm.column(orm.String)
-        date_of_identification = orm.column(orm.Float)
-        identified_by = orm.column(orm.String)
-        comments = orm.column(orm.String)
-        picture_filename = orm.column(orm.String)
-        audio_filename = orm.column(orm.String)
-    def create_table(cls, db):
-        q = u'CREATE TABLE ' + cls.__name__ + ' '
-        q += '(id COUNTER,'
-        q += 'site VARCHAR,'
-        q += 'date FLOAT,'
-        q += 'time FLOAT,'
-        q += 'ima INTEGER,'
-        q += 'xcoord INTEGER,'
-        q += 'ycoord INTEGER,'
-        q += 'position VARCHAR,'
-        q += 'specimen_code VARCHAR,'
-        q += 'family VARCHAR,'
-        q += 'subfamily VARCHAR,'
-        q += 'genus VARCHAR,'
-        q += 'species VARCHAR,'
-        q += 'sex VARCHAR,'
-        q += 'recapture VARCHAR,'
-        q += 'date_of_identification FLOAT,'
-        q += 'identified_by VARCHAR,'
-        q += 'comments LONG VARCHAR,'
-        q += 'picture_filename VARCHAR,'
-        q += 'audio_filename VARCHAR)'
-        db.execute(q)
-        q = u'CREATE UNIQUE INDEX id_index ON '
-        q += cls.__name__ + ' (id)'
-        db.execute(q)
-    create_table = classmethod(create_table)
-    def drop_table(cls, db):
-        q = u'DROP TABLE ' + cls.__name__
-        db.execute(q)
-    drop_table = classmethod(drop_table)
+# class Captures(orm.Mapper):
+#     class mapping:
+#         site = orm.column(orm.String)
+#         date = orm.column(orm.Float) # try this with TIMESTAMP later?
+#         time = orm.column(orm.Float) # try this with TIMESTAMP later?
+#         ima = orm.column(orm.Integer)
+#         xcoord = orm.column(orm.Integer)
+#         ycoord = orm.column(orm.Integer)
+#         position = orm.column(orm.String)
+#         specimen_code = orm.column(orm.String)
+#         family = orm.column(orm.String)
+#         subfamily = orm.column(orm.String)
+#         genus = orm.column(orm.String)
+#         species = orm.column(orm.String)
+#         sex = orm.column(orm.String)
+#         recapture = orm.column(orm.String)
+#         date_of_identification = orm.column(orm.Float)
+#         identified_by = orm.column(orm.String)
+#         comments = orm.column(orm.String)
+#         picture_filename = orm.column(orm.String)
+#         audio_filename = orm.column(orm.String)
+#     def create_table(cls, db):
+#         q = u'CREATE TABLE ' + cls.__name__ + ' '
+#         q += '(id COUNTER,'
+#         q += 'site VARCHAR,'
+#         q += 'date FLOAT,'
+#         q += 'time FLOAT,'
+#         q += 'ima INTEGER,'
+#         q += 'xcoord INTEGER,'
+#         q += 'ycoord INTEGER,'
+#         q += 'position VARCHAR,'
+#         q += 'specimen_code VARCHAR,'
+#         q += 'family VARCHAR,'
+#         q += 'subfamily VARCHAR,'
+#         q += 'genus VARCHAR,'
+#         q += 'species VARCHAR,'
+#         q += 'sex VARCHAR,'
+#         q += 'recapture VARCHAR,'
+#         q += 'date_of_identification FLOAT,'
+#         q += 'identified_by VARCHAR,'
+#         q += 'comments LONG VARCHAR,'
+#         q += 'picture_filename VARCHAR,'
+#         q += 'audio_filename VARCHAR)'
+#         db.execute(q)
+#         q = u'CREATE UNIQUE INDEX id_index ON '
+#         q += cls.__name__ + ' (id)'
+#         db.execute(q)
+#     create_table = classmethod(create_table)
+#     def drop_table(cls, db):
+#         q = u'DROP TABLE ' + cls.__name__
+#         db.execute(q)
+#     drop_table = classmethod(drop_table)
     
 
 ### Capture Object

@@ -10,6 +10,9 @@ import capture
 import trap
 
 import e32db
+import butterflydb
+
+TrapsPopulate()
 
 # Read in the DB
 db = e32db.Dbms()

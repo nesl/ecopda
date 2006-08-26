@@ -3,61 +3,62 @@ import e32
 import e32db
 import time
 import butterfly_helper
+import butterflydb
 import orm
 import keyboard
 import string
 
-# This is the ORM to the table 'Traps'
-class Traps(orm.Mapper):
-    class mapping:
-        site = orm.column(orm.String)
-        date = orm.column(orm.Float) # try this with TIMESTAMP later?
-        time = orm.column(orm.Float) # try this with TIMESTAMP later?
-        ima = orm.column(orm.Integer)
-        xcoord = orm.column(orm.Integer)
-        ycoord = orm.column(orm.Integer)
-        position = orm.column(orm.String)
-        date_of_first_baiting = orm.column(orm.Float)
-        height = orm.column(orm.Float)
-        temperature = orm.column(orm.Float)
-        humidity = orm.column(orm.Float)
-        wind_speed = orm.column(orm.Float)
-        date_of_bait_prep = orm.column(orm.Float)
-        date_of_bait_refill = orm.column(orm.Float)
-        canopy_cover = orm.column(orm.String)
-        collectors = orm.column(orm.String)
-        comments = orm.column(orm.String)
-        barcode = orm.column(orm.String)
-    def create_table(cls, db):
-        q = u'CREATE TABLE ' + cls.__name__ + ' '
-        q += '(id COUNTER,'
-        q += 'site VARCHAR,'
-        q += 'date FLOAT,'
-        q += 'time FLOAT,'
-        q += 'ima INTEGER,'
-        q += 'xcoord INTEGER,'
-        q += 'ycoord INTEGER,'
-        q += 'position VARCHAR,'
-        q += 'date_of_first_baiting FLOAT,'
-        q += 'height FLOAT,'
-        q += 'temperature FLOAT,'
-        q += 'humidity FLOAT,'
-        q += 'wind_speed FLOAT,'
-        q += 'date_of_bait_prep FLOAT,'
-        q += 'date_of_bait_refill FLOAT,'
-        q += 'canopy_cover VARCHAR,'
-        q += 'collectors VARCHAR,'
-        q += 'comments LONG VARCHAR,'
-        q += 'barcode VARCHAR)'
-        db.execute(q)
-        q = u'CREATE UNIQUE INDEX id_index ON '
-        q += cls.__name__ + ' (id)'
-        db.execute(q)
-    create_table = classmethod(create_table)
-    def drop_table(cls, db):
-        q = u'DROP TABLE ' + cls.__name__
-        db.execute(q)
-    drop_table = classmethod(drop_table)
+# # This is the ORM to the table 'Traps'
+# class Traps(orm.Mapper):
+#     class mapping:
+#         site = orm.column(orm.String)
+#         date = orm.column(orm.Float) # try this with TIMESTAMP later?
+#         time = orm.column(orm.Float) # try this with TIMESTAMP later?
+#         ima = orm.column(orm.Integer)
+#         xcoord = orm.column(orm.Integer)
+#         ycoord = orm.column(orm.Integer)
+#         position = orm.column(orm.String)
+#         date_of_first_baiting = orm.column(orm.Float)
+#         height = orm.column(orm.Float)
+#         temperature = orm.column(orm.Float)
+#         humidity = orm.column(orm.Float)
+#         wind_speed = orm.column(orm.Float)
+#         date_of_bait_prep = orm.column(orm.Float)
+#         date_of_bait_refill = orm.column(orm.Float)
+#         canopy_cover = orm.column(orm.String)
+#         collectors = orm.column(orm.String)
+#         comments = orm.column(orm.String)
+#         barcode = orm.column(orm.String)
+#     def create_table(cls, db):
+#         q = u'CREATE TABLE ' + cls.__name__ + ' '
+#         q += '(id COUNTER,'
+#         q += 'site VARCHAR,'
+#         q += 'date FLOAT,'
+#         q += 'time FLOAT,'
+#         q += 'ima INTEGER,'
+#         q += 'xcoord INTEGER,'
+#         q += 'ycoord INTEGER,'
+#         q += 'position VARCHAR,'
+#         q += 'date_of_first_baiting FLOAT,'
+#         q += 'height FLOAT,'
+#         q += 'temperature FLOAT,'
+#         q += 'humidity FLOAT,'
+#         q += 'wind_speed FLOAT,'
+#         q += 'date_of_bait_prep FLOAT,'
+#         q += 'date_of_bait_refill FLOAT,'
+#         q += 'canopy_cover VARCHAR,'
+#         q += 'collectors VARCHAR,'
+#         q += 'comments LONG VARCHAR,'
+#         q += 'barcode VARCHAR)'
+#         db.execute(q)
+#         q = u'CREATE UNIQUE INDEX id_index ON '
+#         q += cls.__name__ + ' (id)'
+#         db.execute(q)
+#     create_table = classmethod(create_table)
+#     def drop_table(cls, db):
+#         q = u'DROP TABLE ' + cls.__name__
+#         db.execute(q)
+#     drop_table = classmethod(drop_table)
 
 def barcode_start():
     import socket
