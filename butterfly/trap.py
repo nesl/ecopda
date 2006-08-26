@@ -199,6 +199,7 @@ class TrapApp:
         self.viewby = 'id Desc'
         self.child_db =[] # this must be set from outside
         self.dbv = e32db.Db_view()
+        self.parent_dict = {}
     def view(self, column, orderby=''):
         self.viewby = column + orderby
         self.switch_in()
@@ -215,7 +216,12 @@ class TrapApp:
             Traps.create_table(self.db)
         except:
             pass
-        appuifw.app.title = u'View: '+unicode(self.viewby)
+        appuifw.app.title = unicode(self.parent_dict['site']
+                                    +':'+str(self.parent_dict['ima'])
+                                    +':('+str(self.parent_dict['xcoord'])
+                                    +','+str(self.parent_dict['ycoord'])
+                                    +'):'+self.parent_dict['position'])
+                                    
         appuifw.app.menu = [(u'Table',
                              ((u'Export Traps', self.export),
                               (u'Upload Traps', self.upload),

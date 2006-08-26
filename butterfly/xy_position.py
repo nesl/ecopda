@@ -20,19 +20,19 @@ class XYPositionApp:
         self.parent_dict = {}
         
     def switch_in(self):
-        appuifw.app.title = u'XY/Position'
+        appuifw.app.title = unicode(self.parent_dict['site'] + ':' + str(self.parent_dict['ima']))
         appuifw.app.menu = []
         L = []
         self.ListID = []
-        where_query = u'(site=' + self.parent_dict['site'] 
-        where_query += 'AND ima=' + str(self.parent_dict['ima']) + ')'
+        where_query = u"(site = '" + self.parent_dict['site'] 
+        where_query += "\' AND ima=" + str(self.parent_dict['ima']) + ')'
         trapconfig_iter = TrapsConfig.select(self.db, where=where_query ,orderby='id DESC')
         try:
             while 1:
                 trapconfigORM = trapconfig_iter.next()
-                L.append(unicode(trapconfigORM.xcoord)
-                         + '/' + unicode(trapconfigORM.ycoord)
-                         + ':' + unicode(trapconfigORM.position))
+                L.append(u'(' + unicode(trapconfigORM.xcoord)
+                         + ',' + unicode(trapconfigORM.ycoord)
+                         + '):' + unicode(trapconfigORM.position))
                 self.ListID.append(trapconfigORM.id)
         except StopIteration:
             pass
@@ -44,5 +44,5 @@ class XYPositionApp:
 
     def switch_out(self):
         self.selected = self.listbox.current()
-        returnval = self.ListID[self.listbox.current()]
-        return returnval
+        trapsconfigORM = TrapsConfig(self.db,id=self.ListID[self.listbox.current()])
+        return trapsconfigORM.dict()

@@ -19,7 +19,7 @@ class SiteImaApp:
         self.selected = 0
         
     def switch_in(self):
-        appuifw.app.title = u'Site/IMA'
+        appuifw.app.title = u'Site:IMA'
         appuifw.app.menu = []
         L = []
         self.ListID = []

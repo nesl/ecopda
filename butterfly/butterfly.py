@@ -44,8 +44,8 @@ def handle_tab(index):
             xy_position_app.parent_dict = temp_dict
             xy_position_app.switch_in()
         elif index == 2:
-            temp = xy_position_app.switch_out()
-            trap_app.selection = temp
+            temp_dict = xy_position_app.switch_out()
+            trap_app.parent_dict = temp_dict
             trap_app.switch_in()
         elif index == 3:
             temp = trap_app.switch_out()
@@ -78,7 +78,7 @@ app_lock = e32.Ao_lock()
 appuifw.app.exit_key_handler = exit_key_handler
 
 # Create the tabs with its names in unide as a list, include the tab handler
-appuifw.app.set_tabs([u'Site/IMA', u'XY/Position', u'Trap', u'Capture'], handle_tab)
+appuifw.app.set_tabs([u'Site:IMA', u'X,Y:Position', u'Trap', u'Capture'], handle_tab)
 
 # Create the application objects
 capture_app = capture.CaptureApp(db)
