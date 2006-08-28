@@ -1,11 +1,13 @@
-import appuifw, dir_iter, time, base64, StringIO, httplib, urllib, time, e32
+import appuifw, dir_iter, time, base64, StringIO, httplib, urllib, time, e32, audio
 from key_codes import EKeySelect, EKey1, EKey3, EKeyEdit, EKeyBackspace
+import graphics
 
 app_lock = e32.Ao_lock()
 
 global user_name, demo_name, demo_auth, demo_affil
 global num_vis, demo_rate, demo_comm, image_file
 global image_dir, old_files, old_focus
+user_name = u''
 
 def exit_key_handler():
   app_lock.signal()
@@ -34,11 +36,14 @@ def image_focus(focus):
   
 
 def done():
-  exit_key_handler()
+  # reset the user name
+  global user_name
+  user_name = u''
+  splash_screen()
+  #exit_key_handler()
 
 def not_done():
-  global user_name
-  init_app(user_name)
+  init_app()
 
 def continue_app():
   global user_name, demo_name, demo_auth, demo_affil
@@ -190,11 +195,27 @@ def start_app():
         
       
     elif curr == dname:
-      demo_name = appuifw.query(u'What is the name of the demo?', 'text')
-      if demo_name <> None:
+
+      demo_name_list = [u'DietGame', u'CoCoa', u'UbiREAL', u'AudioIndex', u'RedTacton', u'MASTABA']
+      demo_name_list = demo_name_list + [u'UbiCommunity', u'Barcode', u'WiRope', u'Pileus', u'BiblioRoll', u'LINC', u'AnonComm']
+      demo_name_list = demo_name_list + [u'Push!Photo', u'UrbanCENS', u'HumanState', u'SpaceTracer', u'RWAttention', u'Flood']
+      demo_name_list = demo_name_list + [u'Jetcam', u'Hullabaloo', u'iPoi', u'TinyObj', u'MedAware', u'SmartFuroshiki', u'WonderWall']
+      demo_name_list = demo_name_list + [u'MicroLearning', u'Spinal', u'Haggle', u'Crossroads']
+ 
+      demo_name_index = appuifw.popup_menu(demo_name_list, u"Select the demo name and press ok.")
+      if(demo_name_index in range(0, 30)):
+        demo_name = demo_name_list[demo_name_index]
         demoList.pop(current)
         if len(demoList):
           questListBox.set_list(demoList)
+
+      #demo_name_index = appuifw.selection_list(choices=demo_name_list, search_field=1)
+
+      #demo_name = appuifw.query(u'What is the name of the demo?', 'text')
+      #if demo_name <> None:
+      #  demoList.pop(current)
+      #  if len(demoList):
+      #    questListBox.set_list(demoList)
         
       
     elif curr == dauth:
@@ -254,14 +275,21 @@ def start_app():
   questListBox.bind(EKeySelect, edit)
   appuifw.app.body = questListBox
 
-def init_app(name = None):
+def splash_screen():
+
+  appuifw.app.body = c = appuifw.Canvas()
+  im = graphics.Image.open('E:\\Images\\splash.jpg')
+
+  c.blit(im, target=(5,23), scale=0)
+  #sf = audio.Sound.open('E:\\Sounds\\gb.m4a')
+  #sf.play()
+  #e32.ao_sleep(16)
+  c.bind(EKeySelect, init_app)
+
+def init_app():
   global user_name, demo_name, demo_auth, demo_affil
   global num_vis, demo_rate, demo_comm, image_file
-  
-  if not name:
-    user_name = u''
-  else:
-    user_name = name
+
   demo_name = u''
   demo_auth = u''
   demo_affil = u''
@@ -271,7 +299,7 @@ def init_app(name = None):
   image_file = u''
   
   title = u'UCLA UrbanCENS'
-  if not name:
+  if (user_name == u''):
     intro = u'Welcome.'
   else:
     intro = u'Welcome back, ' + user_name + u'.'
@@ -291,10 +319,11 @@ def init_app(name = None):
   textScreen.add(cont)
   
   textScreen.bind(EKeySelect, start_app)
-  
+
   appuifw.app.body = textScreen
 
-init_app()
+#init_app()
+splash_screen()
 app_lock.wait()
 appuifw.app.title = oldtitle
 appuifw.app.body = None
