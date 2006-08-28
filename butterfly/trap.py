@@ -150,10 +150,10 @@ class Trap:
                 self.trap_dict[field_name] = field_val 
             else:
                 appuifw.note(u"bug: " + field_name + " not in dictionary.", "error")
-
         trapORM = Traps(self.db, self.id, **self.trap_dict)
         if self.id == None:
             # I was new
+            appuifw.note(u'I am new')
             self.id = trapORM.id
         else:
             # I was old. So I have to update the DB
@@ -290,6 +290,8 @@ class TrapApp:
 #                 appuifw.note(u"Deleted.")
         self.switch_in()
     def new_trap(self):
+        #self.parent_dict has an id field already, make it = None
+        self.parent_dict['id']=None
         trap = Trap(self.db, **(self.parent_dict))
         trap.execute_form()
     def switch_out(self):
