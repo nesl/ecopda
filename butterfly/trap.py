@@ -72,7 +72,7 @@ def barcode_start():
         
 ### Trap Object
 class Trap:
-    def __init__(self, db, id=None, kw={}):
+    def __init__(self, db, id=None, **kw):
         self.db = db
         self.id = id
         self.form = None
@@ -285,7 +285,7 @@ class TrapApp:
 #                 appuifw.note(u"Deleted.")
         self.switch_in()
     def new_trap(self):
-        trap = Trap(self.db, kw=self.parent_dict)
+        trap = Trap(self.db, **(self.parent_dict))
         trap.execute_form()
     def switch_out(self):
         self.selected=self.listbox.current()
