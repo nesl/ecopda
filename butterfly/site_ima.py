@@ -36,6 +36,7 @@ class SiteImaApp:
         except StopIteration:
             pass
         self.listbox = appuifw.Listbox(L,self.lb_callback)
+        self.listbox.set_list(L, self.selected)
         appuifw.app.body = self.listbox
 
     def lb_callback(self):
