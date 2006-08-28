@@ -73,7 +73,7 @@ import audio
 
 ### Capture Object
 class Capture:
-    def __init__(self, db, id=None, ima=0, **kw):
+    def __init__(self, db, id=None, **kw):
         self.db = db
         self.id = id
         self.form = None
@@ -90,7 +90,7 @@ class Capture:
                                 u'Other']
         self.sex_combo       = [u'F',u'M']
         self.recapture_combo = [u'N',u'Y']
-        self.ima = ima
+        #self.ima = ima
 
         # Dict of form fields
         self.capture_dict = {
@@ -99,7 +99,7 @@ class Capture:
             'time'       : float((time.gmtime()[3] * 3600 \
                                   + time.gmtime()[4] * 60 + \
                                   + time.gmtime()[5])), # Seconds since midnight
-            'ima'       : self.ima, # The Array ID
+            'ima'       : 0, # The Array ID
             'xcoord'    : 0, # Array X coord
             'ycoord'    : 0, # Array Y coord
             'position'  : u'', # Stratum: Canopy or Understory
@@ -121,36 +121,39 @@ class Capture:
 
     ## NOTE: form field names need to map to dict names,
     ## which need to map to variable names.
+    ##currently, save_hook strips off everything before and including the ":"
     def create_form_fields(self):
-        form_fields = [(u'Site','text',self.capture_dict[u'site']),
-                       (u'Date','date', self.capture_dict[u'date']),
-                       (u'Time','time',self.capture_dict[u'time']),
-                       (u'IMA','number',self.capture_dict[u'ima']),
-                       (u'xcoord','number',self.capture_dict[u'xcoord']),
-                       (u'ycoord','number',self.capture_dict[u'ycoord']),
-                       (u'Position','combo',(self.position_combo,
-                                             butterfly_helper.default_combo_index(self.position_combo,
-                                                                 self.capture_dict[u'position']))),
-                       (u'Specimen_Code','text',self.capture_dict[u'specimen_code']),
-                       (u'Family','combo',(self.family_combo,
+        form_fields = [
+#                       (u'Site','text',self.capture_dict[u'site']),
+                       (u'1:Date','date', self.capture_dict[u'date']),
+                       (u'2:Time','time',self.capture_dict[u'time']),
+#                       (u'IMA','number',self.capture_dict[u'ima']),
+#                       (u'xcoord','number',self.capture_dict[u'xcoord']),
+#                       (u'ycoord','number',self.capture_dict[u'ycoord']),
+#                       (u'Position','combo',(self.position_combo,
+ #                                            butterfly_helper.default_combo_index(self.position_combo,
+ #                                                                self.capture_dict[u'position']))),
+                       (u'3:Specimen_Code','text',self.capture_dict[u'specimen_code']),
+                       (u'4:Family','combo',(self.family_combo,
                                            butterfly_helper.default_combo_index(self.family_combo,
                                                                self.capture_dict[u'family']))),
-                       (u'Subfamily','combo',(self.subfamily_combo,
+                       (u'5:Subfamily','combo',(self.subfamily_combo,
                                               butterfly_helper.default_combo_index(self.subfamily_combo,
                                                                   self.capture_dict[u'subfamily']))),
-                       (u'Genus','text',self.capture_dict[u'genus']),
-                       (u'Species','text',self.capture_dict[u'species']),
-                       (u'Sex','combo',(self.sex_combo,
+                       (u'6:Genus','text',self.capture_dict[u'genus']),
+                       (u'7:Species','text',self.capture_dict[u'species']),
+                       (u'8:Sex','combo',(self.sex_combo,
                                         butterfly_helper.default_combo_index(self.sex_combo,
                                                             self.capture_dict[u'sex']))),
-                       (u'Recapture','combo',(self.recapture_combo,
+                       (u'9:Recapture','combo',(self.recapture_combo,
                                               butterfly_helper.default_combo_index(self.recapture_combo,
                                                                   self.capture_dict['recapture']))),
-                       (u'Date_of_Identification','date',self.capture_dict['date_of_identification']),
-                       (u'Identified_By','text',self.capture_dict['identified_by']),
-                       (u'Comments','text',self.capture_dict[u'comments']),
-                       (u'Picture_Filename','text',self.capture_dict[u'picture_filename']),
-                       (u'Audio_Filename','text',self.capture_dict[u'audio_filename'])]
+                       (u'10:Date_of_Identification','date',self.capture_dict['date_of_identification']),
+                       (u'11:Identified_By','text',self.capture_dict['identified_by']),
+                       (u'12:Comments','text',self.capture_dict[u'comments'])
+#                       (u'Picture_Filename','text',self.capture_dict[u'picture_filename']),
+#                       (u'Audio_Filename','text',self.capture_dict[u'audio_filename'])
+                        ]
         return form_fields
 
     def save_hook(self, form_list):
@@ -159,6 +162,7 @@ class Capture:
         # Has the structure [(u'field_name','type','data'), ... ]
         for i in form_list:
             field_name = str(i[0]).lower()
+            field_name = field_name[ ( string.find(field_name,":")+1 ) : ]
             field_val = None
             if (i[1] != 'combo'):
                 field_val = i[2]

@@ -105,29 +105,32 @@ class Trap:
         # Pick up anything new specified by the caller.
         self.trap_dict.update(kw)
 
+    ##currently, save_hook strips off everything before and including the ":"
     def create_form_fields(self):
-        form_fields = [(u'Site','text',self.trap_dict[u'site']),
-                       (u'Date','date', self.trap_dict[u'date']),
-                       (u'Time','time',self.trap_dict[u'time']),
-                       (u'IMA','number',self.trap_dict[u'ima']),
-                       (u'xcoord','number',self.trap_dict[u'xcoord']),
-                       (u'ycoord','number',self.trap_dict[u'ycoord']),
-                       (u'Position','combo',(self.position_combo,
-                                             butterfly_helper.default_combo_index(self.position_combo,
-                                                                                  self.trap_dict[u'position']))),
-                       (u'Date_of_First_Baiting','date',self.trap_dict[u'date_of_first_baiting']),
-                       (u'Height','float',self.trap_dict[u'height']),
-                       (u'Temperature','float',self.trap_dict[u'temperature']),
-                       (u'Humidity','float',self.trap_dict[u'humidity']),
-                       (u'Wind_Speed','float',self.trap_dict[u'wind_speed']),
-                       (u'Date_of_Bait_Prep','date',self.trap_dict[u'date_of_bait_prep']),
-                       (u'Date_of_Bait_Refill','date',self.trap_dict[u'date_of_bait_refill']),
-                       (u'Canopy_Cover','combo',(self.canopy_cover_combo,
+        form_fields = [
+#                       (u'Site','text',self.trap_dict[u'site']),
+                       (u'1:Date','date', self.trap_dict[u'date']),
+                       (u'2:Time','time',self.trap_dict[u'time']),
+#                       (u'IMA','number',self.trap_dict[u'ima']),
+#                       (u'xcoord','number',self.trap_dict[u'xcoord']),
+#                       (u'ycoord','number',self.trap_dict[u'ycoord']),
+#                       (u'Position','combo',(self.position_combo,
+  #                                           butterfly_helper.default_combo_index(self.position_combo,
+  #                                                                                self.trap_dict[u'position']))),
+                       (u'3:Date_of_First_Baiting','date',self.trap_dict[u'date_of_first_baiting']),
+                       (u'4:Height','float',self.trap_dict[u'height']),
+                       (u'5:Temperature','float',self.trap_dict[u'temperature']),
+                       (u'6:Humidity','float',self.trap_dict[u'humidity']),
+                       (u'7:Wind_Speed','float',self.trap_dict[u'wind_speed']),
+                       (u'8:Date_of_Bait_Prep','date',self.trap_dict[u'date_of_bait_prep']),
+                       (u'9:Date_of_Bait_Refill','date',self.trap_dict[u'date_of_bait_refill']),
+                       (u'10:Canopy_Cover','combo',(self.canopy_cover_combo,
                                                  butterfly_helper.default_combo_index(self.canopy_cover_combo,
                                                                                       self.trap_dict[u'canopy_cover']))),
-                       (u'Collectors','text',self.trap_dict[u'collectors']),
-                       (u'Comments','text',self.trap_dict[u'comments']),
-                       (u'Barcode','text',self.trap_dict[u'barcode'])]
+                       (u'11:Collectors','text',self.trap_dict[u'collectors']),
+                       (u'12:Comments','text',self.trap_dict[u'comments'])
+#                       (u'Barcode','text',self.trap_dict[u'barcode'])
+                        ]
         return form_fields
     def save_hook(self, form):
         # form is the user's form.
@@ -135,6 +138,8 @@ class Trap:
         self.form = form
         for i in self.form:
             field_name = str(i[0]).lower()
+            field_name = field_name[ ( string.find(field_name,":")+1 ) : ]
+            field_name = field_name.lower()
             field_val = None
             if (i[1] != 'combo'):
                 field_val = i[2]
