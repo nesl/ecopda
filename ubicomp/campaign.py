@@ -48,6 +48,12 @@ def not_done():
 def continue_app():
   global user_name, demo_name, demo_auth, demo_affil
   global num_vis, demo_rate, demo_comm, image_file
+
+  user_name = user_name.replace(',', '_')
+  demo_name = demo_name.replace(',', '_')
+  demo_auth = demo_auth.replace(',', '_')
+  demo_affil = demo_affil.replace(',', '_')
+  demo_comm = demo_comm.replace(',', '_')
   
   continueScreen = appuifw.Text()
   continueScreen.add(u'Are you done, ' + user_name + u'?')
@@ -76,7 +82,8 @@ def continue_app():
   image_data = image_output.getvalue()
   t2 = time.time()
 
-  print 'Image Base 64 Time %0.3fms' % ((t2-t1)*1000.)
+  #print 'Image Base 64 Time %0.3fms' % ((t2-t1)*1000.)
+  datasentScreen.add(u'\n\nData encoded...')
 
   xml = '<?xml version="1.0" encoding="UTF-8"?>'
   xml += '<table>'
@@ -106,7 +113,8 @@ def continue_app():
   params = urllib.urlencode(params)
   t2 = time.time()
 
-  print 'URL Encode Time %0.3fms' % ((t2-t1)*1000.)
+  #print 'URL Encode Time %0.3fms' % ((t2-t1)*1000.)
+  datasentScreen.add(u'\n\nXML encoded...')
 
   headers = {}
   headers['Content-type']='application/x-www-form-urlencoded'
@@ -120,7 +128,9 @@ def continue_app():
   conn.close()
   t2 = time.time()
 
-  print 'HTTP Post Time %0.3fms' % ((t2-t1)*1000.)
+  #print 'HTTP Post Time %0.3fms' % ((t2-t1)*1000.)
+  datasentScreen.add(u'\n\nHTTP POST...')
+  e32.ao_sleep(1)
 
   #print responseText
 
