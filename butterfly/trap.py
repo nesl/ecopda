@@ -239,7 +239,14 @@ class TrapApp:
                             (u'Statistics',
                              ((u'Number of Traps', self.number_of_traps),
                               (u'Average Captures per Trap', self.ave_captures_per_trap)))]
-        trap_iter = Traps.select(self.db, orderby='id DESC') 
+        where_query = u"(site = '" + self.parent_dict['site'] + "'"
+        where_query += u" AND ima=" + str(self.parent_dict['ima'])
+        where_query += u" AND xcoord=" + str(self.parent_dict['xcoord'])
+        where_query += u" AND ycoord=" + str(self.parent_dict['ycoord'])
+        where_query += u" AND position='" + str(self.parent_dict['position']) + "'"
+        where_query += ')'
+        print where_query
+        trap_iter = Traps.select(self.db, where=where_query, orderby='id DESC') 
         L = [u'New Trap / Show all']
         self.ListID = [None]
         try:
