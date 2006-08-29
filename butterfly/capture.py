@@ -91,7 +91,8 @@ class Capture:
         self.sex_combo       = [u'F',u'M']
         self.recapture_combo = [u'N',u'Y']
         #self.ima = ima
-
+        self.picture_filename = u''
+        
         # Dict of form fields
         self.capture_dict = {
             'site'      : u'', # Caxluana
@@ -174,6 +175,10 @@ class Capture:
             else:
                 appuifw.note(u"bug: " + field_name + " not in dictionary.", "error")
 
+        # Check for self.picture_filename
+        if self.picture_filename is not u'':
+            self.capture_dict['picture_filename'] = self.picture_filename
+        
         captureORM = Captures(self.db, self.id, **self.capture_dict)
         if self.id == None:
             # I was new
@@ -192,13 +197,24 @@ class Capture:
         # Creates the form
         self.form = appuifw.Form(form_fields, flags)
         self.form.save_hook = self.save_hook
+        self.form.menu = [(u'Apply Picture', self.apply_picture_filename)]
         return self.form
 
     def execute_form(self, flags = None):
         self.form = self.create_form(flags)
         self.form.execute()
 
-
+    def apply_picture_filename(self):
+        self.picture_filename = butterfly_helper.get_newest_image_name()
+        appuifw.note(u"Applying: " + self.picture_filename)
+        self.save_hook(self.form)
+        
+#         captureORM = Captures(self.db,self.id,picture_filename = self.picture_filename)
+#         if self.id == None:
+#             self.id = captureORM.id
+#         else:
+#             captureORM.set(picture_filename = self.picture_filename)
+        
     
 class AudioApp:
     def __init__(self, exit_cb, captureORM):
