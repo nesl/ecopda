@@ -10,8 +10,6 @@ import capture
 import trap
 import site_ima
 import xy_position
-
-
 import e32db
 import butterflydb
 
