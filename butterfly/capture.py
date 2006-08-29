@@ -290,7 +290,7 @@ class CaptureApp:
         self.fname = u'e:\\butterfly_data\\captures.xml'
         self.selection = -1 # -1 for all -2 for orphans
         self.mass_delete_id = -1
-        self.parent_db = []
+        self.parent_db = {}
         self.viewby = 'date DESC'
     def show_orphans(self):
         self.selection = -2
@@ -448,7 +448,14 @@ class CaptureApp:
         # At this point, user has exited form.
         
     def switch_out(self):
-        return
+        # Find out the id of our current selected capture.
+        # Create a dictionary representation of that capture.
+        # Return it.
+        if self.listbox.current() is not 0:
+            captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
+            return captureORM.dict()
+        else:
+            return {}
     
     def take_picture(self, captureORM):
         self.screen_picture = camera.take_photo(size = (1280, 960))

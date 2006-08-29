@@ -12,6 +12,7 @@ import site_ima
 import xy_position
 import e32db
 import butterflydb
+import attachment
 
 butterflydb.TrapsPopulate()
 
@@ -49,6 +50,10 @@ def handle_tab(index):
             temp = trap_app.switch_out()
             capture_app.selection = temp
             capture_app.switch_in()
+        elif index == 4:
+            temp_dict = capture_app.switch_out()
+            attachment_app.parent_dict = temp_dict
+            attachment_app.switch_in(temp_dict)
         else:
             appuifw.note(u'Invalid index:' + index, u'alert')
     elif index < last_index:
@@ -65,6 +70,9 @@ def handle_tab(index):
             capture_app.switch_out()
             trap_app.switch_in()
             capture_app.selection = 0
+        elif index == 3:
+            attachment_app.switch_out()
+            capture_app.switch_in()
     else:
         # Starting up
         site_ima_app.switch_in()
@@ -76,7 +84,9 @@ app_lock = e32.Ao_lock()
 appuifw.app.exit_key_handler = exit_key_handler
 
 # Create the tabs with its names in unide as a list, include the tab handler
-appuifw.app.set_tabs([u'Site:IMA', u'X,Y:Position', u'Visits', u'Captures'], handle_tab)
+appuifw.app.set_tabs([u'Site:IMA', u'X,Y:Position', u'Visits',
+                      u'Captures', u'Attachments'], handle_tab)
+                     
 
 # Create the application objects
 capture_app = capture.CaptureApp(db)
@@ -85,7 +95,7 @@ trap_app.child_db=capture_app
 capture_app.parent_db=trap_app.db
 site_ima_app = site_ima.SiteImaApp(positions_db)
 xy_position_app = xy_position.XYPositionApp(positions_db)
-
+attachment_app = attachment.AttachmentApp(db)
 # Set app.body to app1 (for start of script)
 handle_tab(0)
 

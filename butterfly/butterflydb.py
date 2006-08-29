@@ -143,7 +143,7 @@ def TrapsPopulate():
     except:
         pass
     TrapsConfig.create_table(db)
-    for site in ['CAXI', 'SURI']:
+    for site in ['CAXI']:
         for ima in range(1,4):
             for (xcoord,ycoord) in [(01,300), (01,900),
                                     (04,000), (04,600)]:
