@@ -201,7 +201,7 @@ class TrapApp:
         self.db = db
         self.fname = u'e:\\butterfly_data\\traps.xml'
         self.selected = 0
-        self.viewby = 'id Desc'
+        self.viewby = 'date Desc'
         self.child_db =[] # this must be set from outside
         self.dbv = e32db.Db_view()
         self.parent_dict = {}
@@ -247,7 +247,7 @@ class TrapApp:
         where_query += ')'
         print where_query
         trap_iter = Traps.select(self.db, where=where_query, orderby='id DESC') 
-        L = [u'New Trap / Show all']
+        L = [u'New Visit / Show all']
         self.ListID = [None]
         try:
             while 1:
