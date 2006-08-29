@@ -143,15 +143,15 @@ def TrapsPopulate():
     except:
         pass
     TrapsConfig.create_table(db)
-    for site in ['BRA']:
-        for ima in range(0,6):
-            for xcoord in range (1,3):
-                for ycoord in range(1,3):
-                    for position in ['U','C']:
-                        mydict = {'site':site,
-                                  'ima':ima,
-                                  'xcoord':xcoord,
-                                  'ycoord':ycoord,
-                                  'position':position}
-                        trapsconfigORM = TrapsConfig(db,**mydict)
+    for site in ['CAXI', 'SURI']:
+        for ima in range(1,4):
+            for (xcoord,ycoord) in [(01,300), (01,900),
+                                    (04,000), (04,600)]:
+                for position in ['U','C']:
+                    mydict = {'site':site,
+                              'ima':ima,
+                              'xcoord':xcoord,
+                              'ycoord':ycoord,
+                              'position':position}
+                    trapsconfigORM = TrapsConfig(db,**mydict)
     
