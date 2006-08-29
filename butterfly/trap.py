@@ -245,7 +245,6 @@ class TrapApp:
         where_query += u" AND ycoord=" + str(self.parent_dict['ycoord'])
         where_query += u" AND position='" + str(self.parent_dict['position']) + "'"
         where_query += ')'
-        print where_query
         trap_iter = Traps.select(self.db, where=where_query, orderby='id DESC') 
         L = [u'New Visit / Show all']
         self.ListID = [None]
