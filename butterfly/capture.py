@@ -92,6 +92,9 @@ class Capture:
         self.recapture_combo = [u'N',u'Y']
         #self.ima = ima
         self.picture_filename = u''
+        if u'picture_filename' in kw:
+            self.picture_filename = kw['picture_filename']
+        
         
         # Dict of form fields
         self.capture_dict = {
@@ -197,7 +200,8 @@ class Capture:
         # Creates the form
         self.form = appuifw.Form(form_fields, flags)
         self.form.save_hook = self.save_hook
-        self.form.menu = [(u'Apply Picture', self.apply_picture_filename)]
+        self.form.menu = [(u'Apply Picture', self.apply_picture_filename),
+                          (u'View Picture', self.view_picture_filename)]
         return self.form
 
     def execute_form(self, flags = None):
@@ -208,13 +212,25 @@ class Capture:
         self.picture_filename = butterfly_helper.get_newest_image_name()
         appuifw.note(u"Applying: " + self.picture_filename)
         self.save_hook(self.form)
-        
-#         captureORM = Captures(self.db,self.id,picture_filename = self.picture_filename)
-#         if self.id == None:
-#             self.id = captureORM.id
-#         else:
-#             captureORM.set(picture_filename = self.picture_filename)
-        
+
+    def view_picture_filename(self):
+        self.img = Image.new((400,400))
+        self.screen_picture = Image.open(self.picture_filename)
+        self.canvas = appuifw.Canvas(redraw_callback=self.handle_redraw)
+        self.old_body = appuifw.app.body
+        appuifw.app.title = u'Image'
+        appuifw.app.menu = [(u"Close", self.close_picture)]
+        appuifw.app.body = self.canvas
+        self.handle_redraw(())
+
+
+    def close_picture(self):
+        appuifw.app.body = self.old_body
+
+    def handle_redraw(self,rect):
+        self.img.blit(self.screen_picture,target=(8,10,336,260),scale=1)
+        self.canvas.blit(self.img)
+        return
     
 class AudioApp:
     def __init__(self, exit_cb, captureORM):
