@@ -195,7 +195,8 @@ class Trap:
                                         unicode(barcode_result))
         
 class TrapApp:
-    def __init__(self,db):
+    def __init__(self,butterfly_app, db):
+        self.butterfly_app = butterfly_app
         self.listbox = None
         self.ListID = []
         self.db = db

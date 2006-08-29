@@ -11,7 +11,8 @@ import keyboard
 import e32db
 
 class SiteImaApp:
-    def __init__(self,db):
+    def __init__(self,butterfly_app,db):
+        self.butterfly_app = butterfly_app
         self.listbox = None
         self.ListID = []
         self.db = db
