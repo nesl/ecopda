@@ -78,7 +78,7 @@ app_lock = e32.Ao_lock()
 appuifw.app.exit_key_handler = exit_key_handler
 
 # Create the tabs with its names in unide as a list, include the tab handler
-appuifw.app.set_tabs([u'Site:IMA', u'X,Y:Position', u'Trap', u'Capture'], handle_tab)
+appuifw.app.set_tabs([u'Site:IMA', u'X,Y:Position', u'Visits', u'Captures'], handle_tab)
 
 # Create the application objects
 capture_app = capture.CaptureApp(db)
