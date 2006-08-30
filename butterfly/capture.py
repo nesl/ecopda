@@ -198,7 +198,7 @@ class Capture:
             flags = appuifw.FFormEditModeOnly + appuifw.FFormDoubleSpaced
         form_fields = self.create_form_fields()
         # Creates the form
-        self.form = appuifw.Form(form_fields, flags)
+        self.form = self.create_form_fields()
         self.form.save_hook = self.save_hook
         self.form.menu = [(u'Apply Picture', self.apply_picture_filename),
                           (u'View Picture', self.view_picture_filename)]

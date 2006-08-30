@@ -161,6 +161,8 @@ def CreateBarcode(trap_name):
 def TrapsPopulate():
     db = e32db.Dbms()
     fn = u'e:\\trapsconfig.db'
+    exp_fn = u'e:\\trapsconfig.txt'
+    f = open(exp_fn,'w')
     try:
         db.create(fn)
     except:
@@ -193,5 +195,8 @@ def TrapsPopulate():
                               'position':position,
                               'barcode':barcode}
                     trapsconfigORM = TrapsConfig(db,**mydict)
+                    f.write(trap_name+';'+barcode+'\n')
+    f.close()
+
                     
     
