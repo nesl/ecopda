@@ -88,12 +88,11 @@ class ButterflyApp:
                 self.trap_app.parent_dict = temp_dict
                 self.trap_app.switch_in()
             elif index == 3: # Captures
-                temp = self.trap_app.switch_out()
-                self.capture_app.selection = temp
+                temp_dict = self.trap_app.switch_out()
+                self.capture_app.parent_dict = temp_dict
                 self.capture_app.switch_in()
             elif index == 4: # Attachments
                 temp_dict = self.capture_app.switch_out()
-                self.attachment_app.parent_dict = temp_dict
                 self.attachment_app.switch_in(temp_dict)
             else:
                 appuifw.note(u'Invalid index:' + index, u'alert')

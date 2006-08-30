@@ -217,8 +217,7 @@ class TrapApp:
             #return -1 to select all traps, else return the id for the currently selected one
         trapORM = Traps(self.db,id=self.ListID[self.listbox.current()])
         #trapORM is a dictionary
-        returnval = trapORM.id
-        return returnval
+        return trapORM.dict()
 
     def reset_traps_table(self):
         Traps.drop_table(self.db)

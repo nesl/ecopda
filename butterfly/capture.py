@@ -291,32 +291,37 @@ class CaptureApp:
         self.fname = u'e:\\butterfly_data\\captures.xml'
         self.selection = -1 # -1 for all -2 for orphans
         self.mass_delete_id = -1
-        self.parent_db = {}
+        self.parent_dict = {}
         self.viewby = 'date DESC'
     def show_orphans(self):
         self.selection = -2
-        self.switch_in()
+        self.switch_in(self.parent_dict)
     def view(self, column, orderby=''):
         self.viewby = column + orderby
-        self.switch_in()
+        self.switch_in(self.parent_dict)
     def number_of_traps(self):
         return
     def ave_captures_per_trap(self):
         return
-    def switch_in(self):
-        try:
-            Captures.create_table(self.db)
-        except:
-            pass
+    def switch_in(self, parent_dict = None):
+        if parent_dict is None:
+            self.parent_dict = parent_dict
         titlestr= u''
-        if (self.selection == -1):
-            titlestr = unicode('All')
-        elif (self.selection == -2):
-            titlestr = unicode('Orphans')
+#         if (self.selection == -1):
+#             titlestr = unicode('All')
+#         elif (self.selection == -2):
+#             titlestr = unicode('Orphans')
+#         else:
+#             titlestr = unicode(str(self.selection) + ':')
+#         titlestr += unicode(' View: '+self.viewby)
+        if self.valid_parent_id():
+            appuifw.app.title = unicode(self.parent_dict['site']
+                                        +':'+str(self.parent_dict['ima'])
+                                        +':('+str(self.parent_dict['xcoord'])
+                                        +','+str(self.parent_dict['ycoord'])
+                                        +'):'+self.parent_dict['position'])
         else:
-            titlestr = unicode(str(self.selection) + ':')
-        titlestr += unicode(' View: '+self.viewby)
-        appuifw.app.title = titlestr
+            appuifw.app.title = u'ALL Captures'
 
         # create menu:
         menu = [(u'Table',
@@ -350,13 +355,15 @@ class CaptureApp:
         # Fetch a list of previously saved captures:
         # TODO Try with 'id DESC'
 #        capture_iter = Captures.select(self.db, orderby='id DESC')
-        capture_iter = Captures.select(self.db, where='ima = '+str(self.selection), orderby='id DESC') 
-        if (self.selection == -1):
+        capture_iter = Captures.select(self.db, where='ima = '+str(self.parent_dict['ima']), orderby='id DESC') 
+        if not self.valid_parent_id():
             capture_iter = Captures.select(self.db, orderby='id DESC')
-        if (self.selection == -2):
-            capture_iter = Captures.select(self.db, where='(ima <> 1 AND ima <> 0)' )
+#         if (self.selection == -2):
+#             capture_iter = Captures.select(self.db, where='(ima <> 1 AND ima <> 0)' )
         # For each row, Add an id number to the list
-        L = [u'Create New Capture']
+        L = [u'Viewing All']
+        if self.valid_parent_id():
+            L = [u'Create New']
         self.ListID = [None]
         # TEST
         try:
@@ -387,7 +394,7 @@ class CaptureApp:
     def reset_captures_table(self):
         Captures.drop_table(self.db)
         Captures.create_table(self.db)
-        self.switch_in()
+        self.switch_in(self.parent_dict)
         appuifw.note(u'Reset Captures table')
     
     def delete_row(self):
@@ -397,12 +404,13 @@ class CaptureApp:
             captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
             captureORM.delete()
             appuifw.note(u"Deleted")
-            self.switch_in()
+            self.switch_in(self.parent_dict)
             
     def lb_callback(self):
         # If index is == 0, then give the use a new form:
-        if self.listbox.current() == 0:
-            capture = self.new_capture()
+        if (self.listbox.current() == 0):
+            if self.valid_parent_id():
+                capture = self.new_capture()
         else:
             # Save the id of the Index,
             # Create a popup selection box that asks for
@@ -426,7 +434,7 @@ class CaptureApp:
 #                 self.audio_options(captureORM)
                 
         # This will update the listbox
-        self.switch_in()
+        self.switch_in(self.parent_dict)
 
     def mass_delete_on_id(self):
         #will have set self.mass_delete_id beforehand
@@ -444,10 +452,17 @@ class CaptureApp:
         
 
     def new_capture(self):
-        if (self.selection == -1):
-            capture = Capture(self.db)
-        else:
-            capture = Capture(self.db, ima=self.selection)
+#         if (self.selection == -1):
+#             capture = Capture(self.db)
+#         else:
+#             capture = Capture(self.db, ima=self.selection)
+        # pass in parent's dictionary:
+        temp_dict = self.parent_dict.copy()
+        try:
+            del temp_dict['id']
+        except:
+            pass
+        capture = Capture(self.db, temp_dict)
         capture.execute_form()
         # At this point, user has exited form.
         
@@ -608,4 +623,11 @@ class CaptureApp:
         except IOError,(errno, sterror):
             appuifw.note(u'I/O Error(%s)' % (errno,strerror))
             
-            
+    def valid_parent_id(self):
+        try:
+            if self.parent_dict['id'] >= 0:
+                return 1
+        except:
+            pass
+        return 0
+
