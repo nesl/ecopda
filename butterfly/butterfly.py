@@ -93,7 +93,7 @@ class ButterflyApp:
     # menu should be appuifw.app.menu or equivalent
     def menu_items(self):
         return [(u'Barcode Launch', self.barcode_start),
-         (u'Barcode Jump', self.barcode_read)]
+                (u'Barcode Jump', self.barcode_jump)]
 
     def barcode_start(self):
         host = '127.0.0.1'
@@ -124,6 +124,26 @@ class ButterflyApp:
             appuifw.note(u'unable to read: ' + barcodefile)
         f.close()
         return barcode_result
+
+    def barcode_jump(self):
+        barcode_result = self.barcode_read()
+        #TODO: set "history" for the trap_app's parents
+        
+        #Look up in the traps DB
+        #  (barcode = '132131241')
+        where_query = u"(barcode = '" + barcode_result + "')"
+
+        #Get corresponding trapORM
+        try:
+            trapconfig_iter = butterflydb.TrapsConfig.select(self.positions_db,where=where_query, orderby='id')
+        except SymbianError:
+            appuifw.note(u'Error with query', u'error')
+        try:
+            trapconfigORM = trapconfig_iter.next()
+            self.butterfly_app.trap_app.parent_dict = trapconfigORM.dict()
+            self.butterfly_app.switch_in()
+        except (StopIteration, SymbianError):
+            appuifw.note(u'Unable to find matching trap.', u'error')
 
 
 butterfly_app = ButterflyApp()

@@ -21,8 +21,9 @@ class XYPositionApp:
         self.parent_dict = {}
         
     def switch_in(self):
-        appuifw.app.title = unicode(self.parent_dict['site'] + ':' + str(self.parent_dict['ima']) + u'(X,Y):Position' )
+        appuifw.app.title = unicode(self.parent_dict['site'] + ':' + str(self.parent_dict['ima']) + u':(X,Y):Position' )
         appuifw.app.menu = self.butterfly_app.menu_items()
+        appuifw.app.menu.append((u'Barcode View', self.barcode_view))
         L = []
         self.ListID = []
         where_query = u"(site = '" + self.parent_dict['site'] 
@@ -42,9 +43,14 @@ class XYPositionApp:
         appuifw.app.body = self.listbox
 
     def lb_callback(self):
-        pass
+        trapconfigORM = TrapsConfig(self.db,id=self.ListID[self.listbox.current()])
+        appuifw.popup_menu([unicode(trapconfigORM.barcode)],u'Barcode')
 
     def switch_out(self):
-        self.selected = self.listbox.current()
         trapsconfigORM = TrapsConfig(self.db,id=self.ListID[self.listbox.current()])
         return trapsconfigORM.dict()
+
+    def barcode_view(self):
+        trapconfigORM = TrapsConfig(self.db,id=self.ListID[self.listbox.current()])
+        appuifw.popup_menu([unicode(trapconfigORM.barcode)],u'Barcode')
+        

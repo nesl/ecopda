@@ -1,6 +1,7 @@
 import e32
 import e32db
 import orm
+import md5
 
 # This is the ORM to the table 'Traps'
 class Traps(orm.Mapper):
@@ -115,6 +116,7 @@ class TrapsConfig(orm.Mapper):
         xcoord = orm.column(orm.Integer)
         ycoord = orm.column(orm.Integer)
         position = orm.column(orm.String)
+        barcode = orm.column(orm.String)
     def create_table(cls,db):
         q = u'CREATE TABLE ' + cls.__name__ + ''
         q += '(id COUNTER,'
@@ -122,13 +124,39 @@ class TrapsConfig(orm.Mapper):
         q += 'ima INTEGER,'
         q += 'xcoord INTEGER,'
         q += 'ycoord INTEGER,'
-        q += 'position VARCHAR)'
+        q += 'position VARCHAR,'
+        q += 'barcode VARCHAR)'
         db.execute(q)
     create_table = classmethod(create_table)
     def drop_table(cls, db):
         q = u'DROP TABLE ' + cls.__name__
         db.execute(q)
     drop_table = classmethod(drop_table)
+
+
+def IsInt(str):
+    try: int(str)
+    except ValueError:return 0
+    else: return 1
+
+def CheckDigit(arg):
+    weight=[1,3]*6; magic=10; sum = 0
+    for i in range(12):         # checksum based on first 12 digits.
+        sum = sum + int(arg[i]) * weight[i]
+    z = ( magic - (sum % magic) ) % magic
+    return z
+
+def CreateBarcode(trap_name):
+    hexdigest = md5.new(trap_name).hexdigest()
+    barcode = u''
+    for c in hexdigest[0:12]:
+        if IsInt(c):
+            barcode += c
+        else:
+            # this makes a = 0, b = 1, etc.
+            barcode += str(ord(c.lower()) - ord('a'))
+    barcode += str(CheckDigit(barcode))
+    return barcode
 
 def TrapsPopulate():
     db = e32db.Dbms()
@@ -148,10 +176,22 @@ def TrapsPopulate():
             for (xcoord,ycoord) in [(01,300), (01,900),
                                     (04,000), (04,600)]:
                 for position in ['U','C']:
+                    # trap_name looks like (after conv. to lower case):
+                    # caxi:1:(1,300):u
+                    trap_name = site+':'\
+                                +str(ima)+':('\
+                                +str(xcoord)+','\
+                                +str(ycoord)+'):'\
+                                +position
+                    trap_name = trap_name.lower()
+                    barcode = CreateBarcode(trap_name)
+                    print "barcode:" + barcode
                     mydict = {'site':site,
                               'ima':ima,
                               'xcoord':xcoord,
                               'ycoord':ycoord,
-                              'position':position}
+                              'position':position,
+                              'barcode':barcode}
                     trapsconfigORM = TrapsConfig(db,**mydict)
+                    
     
