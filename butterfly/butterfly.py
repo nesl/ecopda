@@ -19,7 +19,7 @@ import socket
 class ButterflyApp:
     def __init__(self):
         # Database stuff start
-        trapsconfigdb = u'e:\\tranpsconfig.db'
+        trapsconfigdb = u'e:\\trapsconfig.db'
         testdb = u'e:\\test.db'
         self.db = e32db.Dbms()
         try:
