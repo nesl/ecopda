@@ -108,8 +108,8 @@ class ButterflyApp:
         
     # menu should be appuifw.app.menu or equivalent
     def menu_items(self):
-        return [(u'Barcode Launch', self.barcode_start),
-                (u'Barcode Jump', self.barcode_jump)]
+        return [(u'Barcode Jump', self.barcode_jump),
+                (u'Barcode Launch', self.barcode_start)]
 
     def barcode_start(self):
         host = '127.0.0.1'
