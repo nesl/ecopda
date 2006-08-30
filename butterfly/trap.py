@@ -208,7 +208,10 @@ class TrapApp:
         trap.execute_form()
         
     def switch_out(self):
-        self.selected=self.listbox.current()
+        try:
+            self.selected=self.listbox.current()
+        except:
+            self.selected=1
         if (self.selected == 0):
             return -1
             #return -1 to select all traps, else return the id for the currently selected one

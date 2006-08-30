@@ -34,6 +34,7 @@ class ButterflyApp:
         self.xy_position_app = xy_position.XYPositionApp(self, self.positions_db)
         self.attachment_app = attachment.AttachmentApp(self, self.db)
         self.app_lock = e32.Ao_lock()
+        self.short_cut = 0
         # Set exit key handler
         appuifw.app.exit_key_handler = self.exit_key_handler
         # Create the tabs
@@ -41,55 +42,65 @@ class ButterflyApp:
                               u'Captures', u'Attachments'], self.handle_tab)
         # Set app.body to app1 (for start of script)
         self.handle_tab(0)
+        
 
     def exit_key_handler(self):
         self.app_lock.signal()
 
     def handle_tab(self, index):
+#         if self.short_cut:
+#             self.short_cut = 0
+#             if index == 2:
+#                 self.capture_app.switch_in()
+#             else:
+#                 appuifw.note(u"I don't know that shortcut")
         if index > self.last_index:
             # Switching right
-            if index == 0:
+            if index == 0: # Site:IMA
                 appuifw.note(u'index cannot be 0',u'alert')
                 self.site_ima_app.switch_in()
-            elif index == 1:
+            elif index == 1: # XY:Pos
                 temp_dict = self.site_ima_app.switch_out()
                 self.xy_position_app.parent_dict = temp_dict
                 self.xy_position_app.switch_in()
-            elif index == 2:
+            elif index == 2: # Visits
                 temp_dict = self.xy_position_app.switch_out()
                 self.trap_app.parent_dict = temp_dict
                 self.trap_app.switch_in()
-            elif index == 3:
+            elif index == 3: # Captures
                 temp = self.trap_app.switch_out()
                 self.capture_app.selection = temp
                 self.capture_app.switch_in()
-            elif index == 4:
+            elif index == 4: # Attachments
                 temp_dict = self.capture_app.switch_out()
                 self.attachment_app.parent_dict = temp_dict
                 self.attachment_app.switch_in(temp_dict)
             else:
                 appuifw.note(u'Invalid index:' + index, u'alert')
         elif index < self.last_index:
+
             # Switching left
-            if index == 0:
+            if index == 0: # Site:IMA
                 self.xy_position_app.switch_out()
                 self.site_ima_app.switch_in()
                 self.xy_position_app.selection = 0 
-            elif index == 1:
+            elif index == 1: # XY:Pos
                 self.trap_app.switch_out()
                 self.xy_position_app.switch_in()
                 self.trap_app.selection = 0
-            elif index == 2:
+            elif index == 2: # Visits
                 self.capture_app.switch_out()
                 self.trap_app.switch_in()
                 self.capture_app.selection = 0
-            elif index == 3:
+            elif index == 3: # Captures
                 self.attachment_app.switch_out()
                 self.capture_app.switch_in()
         else:
+            self.last_index = index
             # Starting up
             self.site_ima_app.switch_in()
-
+        self.last_index = index
+        
     # menu should be appuifw.app.menu or equivalent
     def menu_items(self):
         return [(u'Barcode Launch', self.barcode_start),
@@ -140,8 +151,10 @@ class ButterflyApp:
             appuifw.note(u'Error with query', u'error')
         try:
             trapconfigORM = trapconfig_iter.next()
-            self.butterfly_app.trap_app.parent_dict = trapconfigORM.dict()
-            self.butterfly_app.switch_in()
+            self.trap_app.parent_dict = trapconfigORM.dict()
+            appuifw.app.activate_tab(2)
+            self.last_index = 2
+            self.trap_app.switch_in()
         except (StopIteration, SymbianError):
             appuifw.note(u'Unable to find matching trap.', u'error')
 
