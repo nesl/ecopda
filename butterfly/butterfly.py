@@ -18,13 +18,25 @@ import socket
 # Create the application objects
 class ButterflyApp:
     def __init__(self):
-        # butterflydb.TrapsPopulate needs to be called before the open
-        butterflydb.TrapsPopulate()
-        # Read in the DB
+        # Database stuff start
+        fn = u'e:\tranpsconfig.db'
         self.db = e32db.Dbms()
+        try: self.db.create(fn)
+        except: pass
         self.db.open(u'e:\\test.db')
+        try:
+            butterflydb.Captures.create_table(self.db);
+        except:
+            pass
+        try:
+            butterflydb.Traps.create_table(self.db);
+        except:
+            pass
+        butterflydb.TrapsPopulate() # populates trapsconfig.{db,txt}
         self.positions_db = e32db.Dbms()
         self.positions_db.open(u'e:\\trapsconfig.db')
+        # Databse stuff end
+        
         self.last_index = 0
         self.capture_app = capture.CaptureApp(self, self.db)
         self.trap_app = trap.TrapApp(self, self.db)
