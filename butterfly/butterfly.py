@@ -15,7 +15,7 @@ import butterflydb
 import attachment
 import socket
 
-# Create the application objects
+# Create the application objects 
 class ButterflyApp:
     def __init__(self):
         # Database stuff start
