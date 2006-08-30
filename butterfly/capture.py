@@ -319,18 +319,21 @@ class CaptureApp:
         appuifw.app.title = titlestr
 
         # create menu:
-        appuifw.app.menu = [(u'Table',
-                             ((u'Export Captures', self.export),
-                              (u'Upload Captures', self.upload),
-                              (u'Reset Captures Table', self.reset_captures_table))),
-                            (u'Delete Row', self.delete_row),
-                            (u'View',
-                             ((u'Date',lambda x = None: self.view(column='date', orderby='DESC')),
-                              (u'IMA',lambda x = None: self.view(column='ima', orderby='DESC')),
-                              (u'SITE',lambda x = None: self.view(column='site', orderby='DESC')))),
-                            (u'Statistics',
-                             ((u'Number of Captures', self.number_of_traps),
-                              (u'Average Captures per Trap', self.ave_captures_per_trap)))]
+        menu = [(u'Table',
+                 ((u'Export Captures', self.export),
+                  (u'Upload Captures', self.upload),
+                  (u'Reset Captures Table', self.reset_captures_table))),
+                (u'Delete Row', self.delete_row),
+                (u'View',
+                 ((u'Date',lambda x = None: self.view(column='date', orderby='DESC')),
+                  (u'IMA',lambda x = None: self.view(column='ima', orderby='DESC')),
+                  (u'SITE',lambda x = None: self.view(column='site', orderby='DESC')))),
+                (u'Statistics',
+                 ((u'Number of Captures', self.number_of_traps),
+                  (u'Average Captures per Trap', self.ave_captures_per_trap)))]
+        appuifw.app.menu = self.butterfly_app.menu_items()
+        for x in menu:
+            appuifw.app.menu.append(x)
         
         
         # Make selection box showing all previously saved captures.

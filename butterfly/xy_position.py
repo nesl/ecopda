@@ -22,7 +22,7 @@ class XYPositionApp:
         
     def switch_in(self):
         appuifw.app.title = unicode(self.parent_dict['site'] + ':' + str(self.parent_dict['ima']) + u'(X,Y):Position' )
-        appuifw.app.menu = []
+        appuifw.app.menu = self.butterfly_app.menu_items()
         L = []
         self.ListID = []
         where_query = u"(site = '" + self.parent_dict['site'] 

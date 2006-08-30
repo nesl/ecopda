@@ -137,19 +137,21 @@ class TrapApp:
                                     +':('+str(self.parent_dict['xcoord'])
                                     +','+str(self.parent_dict['ycoord'])
                                     +'):'+self.parent_dict['position'])
-                                    
-        appuifw.app.menu = [(u'Table',
-                             ((u'Export Traps', self.export),
-                              (u'Upload Traps', self.upload),
-                              (u'Reset Traps Table', self.reset_traps_table))),
-                            (u'Delete Row', self.delete_row),
-                            (u'View',
-                             ((u'Date',lambda x = None: self.view(column='date', orderby='DESC')),
-                              (u'IMA',lambda x = None: self.view(column='ima', orderby='DESC')),
-                              (u'SITE',lambda x = None: self.view(column='site', orderby='DESC')))),
-                            (u'Statistics',
-                             ((u'Number of Traps', self.number_of_traps),
-                              (u'Average Captures per Trap', self.ave_captures_per_trap)))]
+        appuifw.app.menu = self.butterfly_app.menu_items()                            
+        menu = [(u'Table',
+                 ((u'Export Traps', self.export),
+                  (u'Upload Traps', self.upload),
+                  (u'Reset Traps Table', self.reset_traps_table))),
+                (u'Delete Row', self.delete_row),
+                (u'View',
+                 ((u'Date',lambda x = None: self.view(column='date', orderby='DESC')),
+                  (u'IMA',lambda x = None: self.view(column='ima', orderby='DESC')),
+                  (u'SITE',lambda x = None: self.view(column='site', orderby='DESC')))),
+                (u'Statistics',
+                 ((u'Number of Traps', self.number_of_traps),
+                  (u'Average Captures per Trap', self.ave_captures_per_trap)))]
+        for x in menu:
+            appuifw.app.menu.append(x)
         where_query = u"(site = '" + self.parent_dict['site'] + "'"
         where_query += u" AND ima=" + str(self.parent_dict['ima'])
         where_query += u" AND xcoord=" + str(self.parent_dict['xcoord'])
