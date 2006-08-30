@@ -13,6 +13,7 @@ import xy_position
 import e32db
 import butterflydb
 import attachment
+import socket
 
 # Create the application objects
 class ButterflyApp:
@@ -88,6 +89,42 @@ class ButterflyApp:
         else:
             # Starting up
             self.site_ima_app.switch_in()
+
+    # menu should be appuifw.app.menu or equivalent
+    def menu_items(self):
+        return [(u'Barcode Launch', self.barcode_start),
+         (u'Barcode Jump', self.barcode_read)]
+
+    def barcode_start(self):
+        host = '127.0.0.1'
+        port = 88
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((host,port))
+        s.close()
+
+    def stupid(self, barcode_result):
+        result = ""
+        for e in barcode_result:
+            if e != '\x00':
+                result += e
+        return result
+
+    def barcode_read(self):
+        barcodefile = u'e:\\mylog.txt'
+        barcode_result = None
+        try:
+            f = open(barcodefile)
+        except:
+            appuifw.note(u'Unable to read barcode file')
+            return u''
+        try:
+            barcode_result = self.stupid(f.read())
+            appuifw.note(u'barcode: ' + barcode_result)
+        except:
+            appuifw.note(u'unable to read: ' + barcodefile)
+        f.close()
+        return barcode_result
+
 
 butterfly_app = ButterflyApp()
 butterfly_app.app_lock.wait()

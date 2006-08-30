@@ -21,7 +21,7 @@ class SiteImaApp:
         
     def switch_in(self):
         appuifw.app.title = u'Site:IMA'
-        appuifw.app.menu = []
+        appuifw.app.menu = self.butterfly_app.menu_items()
         L = []
         self.ListID = []
         dict_sites = {} # keeps track of "sites" we've seen. Chris doesn't like this. :P
@@ -39,6 +39,7 @@ class SiteImaApp:
         self.listbox = appuifw.Listbox(L,self.lb_callback)
         self.listbox.set_list(L, self.selected)
         appuifw.app.body = self.listbox
+
 
     def lb_callback(self):
         pass

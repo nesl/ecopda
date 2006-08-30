@@ -21,7 +21,7 @@ class XYPositionApp:
         self.parent_dict = {}
         
     def switch_in(self):
-        appuifw.app.title = unicode(self.parent_dict['site'] + ':' + str(self.parent_dict['ima']))
+        appuifw.app.title = unicode(self.parent_dict['site'] + ':' + str(self.parent_dict['ima']) + u'(X,Y):Position' )
         appuifw.app.menu = []
         L = []
         self.ListID = []

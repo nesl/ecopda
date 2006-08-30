@@ -8,68 +8,6 @@ import orm
 import keyboard
 import string
 
-# # This is the ORM to the table 'Traps'
-# class Traps(orm.Mapper):
-#     class mapping:
-#         site = orm.column(orm.String)
-#         date = orm.column(orm.Float) # try this with TIMESTAMP later?
-#         time = orm.column(orm.Float) # try this with TIMESTAMP later?
-#         ima = orm.column(orm.Integer)
-#         xcoord = orm.column(orm.Integer)
-#         ycoord = orm.column(orm.Integer)
-#         position = orm.column(orm.String)
-#         date_of_first_baiting = orm.column(orm.Float)
-#         height = orm.column(orm.Float)
-#         temperature = orm.column(orm.Float)
-#         humidity = orm.column(orm.Float)
-#         wind_speed = orm.column(orm.Float)
-#         date_of_bait_prep = orm.column(orm.Float)
-#         date_of_bait_refill = orm.column(orm.Float)
-#         canopy_cover = orm.column(orm.String)
-#         collectors = orm.column(orm.String)
-#         comments = orm.column(orm.String)
-#         barcode = orm.column(orm.String)
-#     def create_table(cls, db):
-#         q = u'CREATE TABLE ' + cls.__name__ + ' '
-#         q += '(id COUNTER,'
-#         q += 'site VARCHAR,'
-#         q += 'date FLOAT,'
-#         q += 'time FLOAT,'
-#         q += 'ima INTEGER,'
-#         q += 'xcoord INTEGER,'
-#         q += 'ycoord INTEGER,'
-#         q += 'position VARCHAR,'
-#         q += 'date_of_first_baiting FLOAT,'
-#         q += 'height FLOAT,'
-#         q += 'temperature FLOAT,'
-#         q += 'humidity FLOAT,'
-#         q += 'wind_speed FLOAT,'
-#         q += 'date_of_bait_prep FLOAT,'
-#         q += 'date_of_bait_refill FLOAT,'
-#         q += 'canopy_cover VARCHAR,'
-#         q += 'collectors VARCHAR,'
-#         q += 'comments LONG VARCHAR,'
-#         q += 'barcode VARCHAR)'
-#         db.execute(q)
-#         q = u'CREATE UNIQUE INDEX id_index ON '
-#         q += cls.__name__ + ' (id)'
-#         db.execute(q)
-#     create_table = classmethod(create_table)
-#     def drop_table(cls, db):
-#         q = u'DROP TABLE ' + cls.__name__
-#         db.execute(q)
-#     drop_table = classmethod(drop_table)
-
-def barcode_start():
-    import socket
-    host = '127.0.0.1'
-    port = 88
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((host,port))
-    s.close()
-
-
-        
 ### Trap Object
 class Trap:
     def __init__(self, db, id=None, **kw):
@@ -108,15 +46,8 @@ class Trap:
     ##currently, save_hook strips off everything before and including the ":"
     def create_form_fields(self):
         form_fields = [
-#                       (u'Site','text',self.trap_dict[u'site']),
                        (u'1:Date','date', self.trap_dict[u'date']),
                        (u'2:Time','time',self.trap_dict[u'time']),
-#                       (u'IMA','number',self.trap_dict[u'ima']),
-#                       (u'xcoord','number',self.trap_dict[u'xcoord']),
-#                       (u'ycoord','number',self.trap_dict[u'ycoord']),
-#                       (u'Position','combo',(self.position_combo,
-  #                                           butterfly_helper.default_combo_index(self.position_combo,
-  #                                                                                self.trap_dict[u'position']))),
                        (u'3:Date_of_First_Baiting','date',self.trap_dict[u'date_of_first_baiting']),
                        (u'4:Height','float',self.trap_dict[u'height']),
                        (u'5:Temperature','float',self.trap_dict[u'temperature']),
@@ -129,7 +60,6 @@ class Trap:
                                                                                       self.trap_dict[u'canopy_cover']))),
                        (u'11:Collectors','text',self.trap_dict[u'collectors']),
                        (u'12:Comments','text',self.trap_dict[u'comments'])
-#                       (u'Barcode','text',self.trap_dict[u'barcode'])
                         ]
         return form_fields
     def save_hook(self, form):
@@ -168,31 +98,11 @@ class Trap:
         # Creates the form
         self.form = appuifw.Form(form_fields, flags)
         self.form.save_hook = self.save_hook
-        self.form.menu = [(u'Launch Barcode Reader', barcode_start),
-                          (u'Accept Barcode', self.barcode_read)]
-
 
     def execute_form(self, flags = None):
         self.create_form(flags)
         self.form.execute()
 
-    def barcode_read(self):
-        barcodefile = u'e:\\mylog.txt'
-        barcode_result = u''
-        f = open(barcodefile)
-        try:
-            barcode_result = self.stupid(f.read())
-            appuifw.note(u'barcode: ' + barcode_result)
-        except:
-            appuifw.note(u'unable to read: ' + barcodefile)
-        f.close()
-        # need to modify self.form
-        titles = [title for (title,type,value) in self.form]
-        barcode_index = butterfly_helper.find_index_of_matching(titles, 'Barcode')
-        if barcode_index is not -1:
-            self.form[barcode_index] = (u'Barcode',
-                                        u'text',
-                                        unicode(barcode_result))
         
 class TrapApp:
     def __init__(self,butterfly_app, db):
@@ -253,9 +163,8 @@ class TrapApp:
             while 1:
                 trapORM = trap_iter.next()
                 if (-1 < string.find(self.viewby, 'date')):
-                    L.append(    #unicode(trapORM.id)
-                         u' ' + time.ctime( trapORM.date + trapORM.time )
-                         + ' GMT')
+                    L.append(u' ' + time.ctime( trapORM.date + trapORM.time )
+                             + ' GMT')
                 elif (-1 < string.find(self.viewby, 'id')):
                     L.append(unicode(trapORM.id))
                 elif (-1 < string.find(self.viewby, 'ima')):
@@ -288,19 +197,14 @@ class TrapApp:
             trapORM = Traps(self.db,id=self.ListID[self.listbox.current()])
             trap = Trap(self.db,**trapORM.dict())
             trap.execute_form()
-#           elif pop_up_index == 2: # Apply Barcode
-#                 trapORM.set(barcode = self.barcode_read())
-#           elif pop_up_index == 3: # Delete
-#                 self.child_db.mass_delete_id = trapORM.id
-#                 self.child_db.mass_delete_on_id()
-#                 trapORM.delete()
-#                 appuifw.note(u"Deleted.")
         self.switch_in()
+
     def new_trap(self):
         #self.parent_dict has an id field already, make it = None
         self.parent_dict['id']=None
         trap = Trap(self.db, **(self.parent_dict))
         trap.execute_form()
+        
     def switch_out(self):
         self.selected=self.listbox.current()
         if (self.selected == 0):
@@ -310,28 +214,6 @@ class TrapApp:
         #trapORM is a dictionary
         returnval = trapORM.id
         return returnval
-
-    def stupid(self, barcode_result):
-        result = ""
-        for e in barcode_result:
-            if e != '\x00':
-                result += e
-        return result
-    
-
-    def barcode_read(self):
-        barcodefile = u'e:\\mylog.txt'
-        barcode_result = None
-
-        f = open(barcodefile)
-        try:
-            barcode_result = self.stupid(f.read())
-            appuifw.note(u'barcode: ' + barcode_result)
-        except:
-            appuifw.note(u'unable to read: ' + barcodefile)
-        f.close()
-        return barcode_result
-        
 
     def reset_traps_table(self):
         Traps.drop_table(self.db)
@@ -358,7 +240,6 @@ class TrapApp:
 
     def upload(self):
         import httplib, urllib
-
         params = {}
         params['email']='adparker@gmail.com'
         params['pw']='ecopda'
