@@ -19,11 +19,14 @@ import socket
 class ButterflyApp:
     def __init__(self):
         # Database stuff start
-        fn = u'e:\tranpsconfig.db'
+        trapconfigdb = u'e:\\tranpsconfig.db'
+        testdb = u'e:\\test.db'
         self.db = e32db.Dbms()
-        try: self.db.create(fn)
-        except: pass
-        self.db.open(u'e:\\test.db')
+        try:
+            self.db.create(testdb)
+        except:
+            pass
+        self.db.open(testdb)
         try:
             butterflydb.Captures.create_table(self.db);
         except:
@@ -34,7 +37,7 @@ class ButterflyApp:
             pass
         butterflydb.TrapsPopulate() # populates trapsconfig.{db,txt}
         self.positions_db = e32db.Dbms()
-        self.positions_db.open(u'e:\\trapsconfig.db')
+        self.positions_db.open(trapsconfigdb)
         # Databse stuff end
         
         self.last_index = 0
