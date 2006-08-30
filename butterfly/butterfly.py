@@ -54,7 +54,12 @@ class ButterflyApp:
 #                 self.capture_app.switch_in()
 #             else:
 #                 appuifw.note(u"I don't know that shortcut")
-        if index > self.last_index:
+        # I have to use a tmp variable because there are situations
+        # where an app's switch_in wants to modify self.last_index
+        # during its execution.
+        tmp_last_index = self.last_index
+        self.last_index = index
+        if index > tmp_last_index:
             # Switching right
             if index == 0: # Site:IMA
                 appuifw.note(u'index cannot be 0',u'alert')
@@ -77,7 +82,7 @@ class ButterflyApp:
                 self.attachment_app.switch_in(temp_dict)
             else:
                 appuifw.note(u'Invalid index:' + index, u'alert')
-        elif index < self.last_index:
+        elif index < tmp_last_index:
 
             # Switching left
             if index == 0: # Site:IMA
@@ -96,10 +101,10 @@ class ButterflyApp:
                 self.attachment_app.switch_out()
                 self.capture_app.switch_in()
         else:
-            self.last_index = index
-            # Starting up
+            # Either we're starting up, or something is
+            # messed up.
             self.site_ima_app.switch_in()
-        self.last_index = index
+
         
     # menu should be appuifw.app.menu or equivalent
     def menu_items(self):
@@ -130,7 +135,7 @@ class ButterflyApp:
             return u''
         try:
             barcode_result = self.stupid(f.read())
-            appuifw.note(u'barcode: ' + barcode_result)
+#            appuifw.note(u'barcode: ' + barcode_result)
         except:
             appuifw.note(u'unable to read: ' + barcodefile)
         f.close()
