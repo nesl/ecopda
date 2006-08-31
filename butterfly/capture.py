@@ -122,13 +122,13 @@ class Capture:
             'visit_id' : 0}
 
         # Pick up anything new specified by caller.
-#         try: del kw['date']
-#         except: pass
-#         try: del kw['time']
-#         except: pass
-#         for k in kw.keys():
-#             if k in self.capture_dict:
-#                 self.capture_dict[k] = kw[k]
+        try: del kw['date']
+        except: pass
+        try: del kw['time']
+        except: pass
+        for k in kw.keys():
+            if k in self.capture_dict:
+                self.capture_dict[k] = kw[k]
 
 
     ## NOTE: form field names need to map to dict names,
