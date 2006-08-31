@@ -204,6 +204,7 @@ class TrapApp:
     def new_trap(self):
         #self.parent_dict has an id field already, make it = None
         self.parent_dict['id']=None
+        self.parent_dict['collectors'] = self.butterfly_app.user
         trap = Trap(self.db, **(self.parent_dict))
         trap.execute_form()
         

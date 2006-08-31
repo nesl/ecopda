@@ -57,6 +57,7 @@ class ButterflyApp:
                               u'Captures', u'Attachments'], self.handle_tab)
         # Set app.body to app1 (for start of script)
         self.handle_tab(0)
+        self.user = u'None'
         
 
     def exit_key_handler(self):
@@ -123,7 +124,16 @@ class ButterflyApp:
     # menu should be appuifw.app.menu or equivalent
     def menu_items(self):
         return [(u'Barcode Jump', self.barcode_jump),
-                (u'Barcode Launch', self.barcode_start)]
+                (u'Barcode Launch', self.barcode_start),
+                (u'Set User', self.set_user)]
+
+    def set_user(self):
+        save_user=appuifw.query(u'Enter user name:', 'text', self.user)
+        if (save_user == u'None'):
+            return
+        else:
+            self.user = unicode(save_user)
+            appuifw.note(u'You entered: '+self.user)
 
     def barcode_start(self):
         host = '127.0.0.1'
