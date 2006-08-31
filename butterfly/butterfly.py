@@ -22,11 +22,12 @@ class ButterflyApp:
         trapsconfigdb = u'e:\\trapsconfig.db'
         testdb = u'e:\\test.db'
         self.db = e32db.Dbms()
-#         try:
-#             self.db.create(testdb)
-#         except:
-#             pass
-        self.db.open(testdb)
+        try:
+            self.db.open(testdb)
+        except:
+            self.db.create(testdb)
+            self.db.open(testdb)
+
         try:
             butterflydb.Captures.create_table(self.db);
         except:

@@ -130,6 +130,13 @@ class Capture:
             if k in self.capture_dict:
                 self.capture_dict[k] = kw[k]
 
+#         appuifw.popup_menu([unicode(self.capture_dict['site']
+#                                     +':'+str(self.capture_dict['ima'])
+#                                     +':('+str(self.capture_dict['xcoord'])
+#                                     +','+str(self.capture_dict['ycoord'])
+#                                     +'):'+self.capture_dict['position'])],
+#                            u'From Capture.__init__')
+
 
     ## NOTE: form field names need to map to dict names,
     ## which need to map to variable names.
@@ -189,6 +196,13 @@ class Capture:
         # Check for self.picture_filename
         if self.picture_filename is not u'':
             self.capture_dict['picture_filename'] = self.picture_filename
+
+#         appuifw.popup_menu([unicode(self.capture_dict['site']
+#                                     +':'+str(self.capture_dict['ima'])
+#                                     +':('+str(self.capture_dict['xcoord'])
+#                                     +','+str(self.capture_dict['ycoord'])
+#                                     +'):'+self.capture_dict['position'])],
+#                            u'From save_hook')
         
         captureORM = Captures(self.db, self.id, **self.capture_dict)
         if self.id == None:
@@ -304,17 +318,15 @@ class CaptureApp:
         self.viewby = 'date DESC'
     def show_orphans(self):
         self.selection = -2
-        self.switch_in(self.parent_dict)
+        self.switch_in()
     def view(self, column, orderby=''):
         self.viewby = column + orderby
-        self.switch_in(self.parent_dict)
+        self.switch_in()
     def number_of_traps(self):
         return
     def ave_captures_per_trap(self):
         return
-    def switch_in(self, parent_dict = None):
-        if parent_dict is not None:
-            self.parent_dict = parent_dict
+    def switch_in(self):
         titlestr= u''
 #         if (self.selection == -1):
 #             titlestr = unicode('All')
@@ -328,7 +340,9 @@ class CaptureApp:
                                         +':'+str(self.parent_dict['ima'])
                                         +':('+str(self.parent_dict['xcoord'])
                                         +','+str(self.parent_dict['ycoord'])
-                                        +'):'+self.parent_dict['position'])
+                                        +'):'+self.parent_dict['position']
+                                        +'\n'+ time.ctime(self.parent_dict['date'] + self.parent_dict['time']))
+
         else:
             appuifw.app.title = u'ALL Captures for this visit'
 
@@ -415,7 +429,7 @@ class CaptureApp:
     def reset_captures_table(self):
         Captures.drop_table(self.db)
         Captures.create_table(self.db)
-        self.switch_in(self.parent_dict)
+        self.switch_in()
         appuifw.note(u'Reset Captures table')
     
     def delete_row(self):
@@ -425,7 +439,7 @@ class CaptureApp:
             captureORM = Captures(self.db,id=self.ListID[self.listbox.current()])
             captureORM.delete()
             appuifw.note(u"Deleted")
-            self.switch_in(self.parent_dict)
+            self.switch_in()
             
     def lb_callback(self):
         # If index is == 0, then give the use a new form:
@@ -455,7 +469,7 @@ class CaptureApp:
 #                 self.audio_options(captureORM)
                 
         # This will update the listbox
-        self.switch_in(self.parent_dict)
+        self.switch_in()
 
     def mass_delete_on_id(self):
         #will have set self.mass_delete_id beforehand
@@ -480,7 +494,7 @@ class CaptureApp:
         # pass in parent's dictionary:
         temp_dict = self.parent_dict.copy()
         try:
-            del temp_dict['id']
+            temp_dict['id'] = None
         except:
             pass
         temp_dict['visit_id'] = self.parent_dict['id']
@@ -623,28 +637,15 @@ class CaptureApp:
         conn.request("POST", "/alpha/upload.php", params, headers)
         response = conn.getresponse()
         responseText = response.read()
+        f = open(u'e:\\sb_response.html','w')
+        f.write(responseText)
         conn.close()
         t2 = time.time()
-        appuifw.note(u'response: '+str(response.status) + '\n'
-                     + u'time: '+ str((t2-t1)*1000.))
+        appuifw.query((u'response: '+str(response.status) + '\n'
+                      + u'time: '+ str((t2-t1)*1000.) + '\n'),"query")
+#                       + responseText),
+#                       "query")
 
-    def upload2(self):
-        # upload to www.leninsgodson.com /courses/pys60/php/set_text.php
-        import httplib, urllib
-        url = "www.leninsgodson.com"
-        headers = {"Content-type": "application/xml"}
-        fname_handle = open(self.fname)
-        data = fname_handle.read()
-        fname_handle.close()
-        try:
-            conn = httplib.HTTPConnection(url)
-            conn.request("POST","/courses/pys60/php/set_text.php", data, headers)
-            response = conn.getresponse()
-            conn.close()
-            appuifw.note(u'Response: '+str(response.status))
-        except IOError,(errno, sterror):
-            appuifw.note(u'I/O Error(%s)' % (errno,strerror))
-            
     def valid_parent_id(self):
         try:
             if self.parent_dict['id'] >= 0:
