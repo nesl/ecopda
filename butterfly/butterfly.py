@@ -129,7 +129,7 @@ class ButterflyApp:
 
     def set_user(self):
         save_user=appuifw.query(u'Enter user name:', 'text', self.user)
-        if (save_user == u'None'):
+        if not save_user:
             return
         else:
             self.user = unicode(save_user)
