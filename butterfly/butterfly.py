@@ -1,19 +1,29 @@
 import appuifw
 import e32
-import time
 
+t = appuifw.Text()
+appuifw.body = t
+t.clear()
+t.add(u'Loading...')
+
+
+import e32db
 import sys
 sys.path.append('e:\\python') #to properly find orm and keyboard
-import orm
-import keyboard
-import capture
-import trap
-import site_ima
-import xy_position
-import e32db
 import butterflydb
-import attachment
-import socket
+import capture
+import trap,site_ima,xy_position,attachment
+import thread
+
+def importRest():
+    time, orm, keyboard,socket,string = \
+    [ \
+        __import__('time'),
+        __import__('orm'),
+        __import__('keyboard'),
+        __import__('socket'),
+        __import__('string')]
+thread.start_new_thread(importRest,())
 
 # Create the application objects 
 class ButterflyApp:
@@ -60,7 +70,7 @@ class ButterflyApp:
         self.handle_tab(0)
         self.user = u'None'
         
-
+        
     def exit_key_handler(self):
         self.app_lock.signal()
 
