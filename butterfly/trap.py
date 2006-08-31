@@ -158,7 +158,8 @@ class TrapApp:
         where_query += u" AND ycoord=" + str(self.parent_dict['ycoord'])
         where_query += u" AND position='" + str(self.parent_dict['position']) + "'"
         where_query += ')'
-        trap_iter = Traps.select(self.db, where=where_query, orderby='id DESC') 
+#        trap_iter = Traps.select(self.db, where=where_query, orderby='id DESC')
+        trap_iter = Traps.select(self.db, orderby='id DESC') 
         L = [u'New Visit / Show all']
         self.ListID = [None]
         try:
@@ -214,7 +215,7 @@ class TrapApp:
         except:
             self.selected=1
         if (self.selected == 0):
-            return -1
+            return None
             #return -1 to select all traps, else return the id for the currently selected one
         trapORM = Traps(self.db,id=self.ListID[self.listbox.current()])
         #trapORM is a dictionary

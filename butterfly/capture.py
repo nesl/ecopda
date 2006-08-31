@@ -118,10 +118,18 @@ class Capture:
             'identified_by' : u'',
             'comments'  : u'',
             'picture_filename' : u'',
-            'audio_filename' : u''}
+            'audio_filename' : u'',
+            'visit_id' : 0}
 
         # Pick up anything new specified by caller.
-        self.capture_dict.update(kw)
+#         try: del kw['date']
+#         except: pass
+#         try: del kw['time']
+#         except: pass
+#         for k in kw.keys():
+#             if k in self.capture_dict:
+#                 self.capture_dict[k] = kw[k]
+
 
     ## NOTE: form field names need to map to dict names,
     ## which need to map to variable names.
@@ -185,6 +193,7 @@ class Capture:
         captureORM = Captures(self.db, self.id, **self.capture_dict)
         if self.id == None:
             # I was new
+            appuifw.note(u'I am new')
             self.id = captureORM.id
         else:
             # I was old. So I have to update the DB
@@ -198,7 +207,7 @@ class Capture:
             flags = appuifw.FFormEditModeOnly + appuifw.FFormDoubleSpaced
         form_fields = self.create_form_fields()
         # Creates the form
-        self.form = self.create_form_fields()
+        self.form = appuifw.Form(form_fields,flags)
         self.form.save_hook = self.save_hook
         self.form.menu = [(u'Apply Picture', self.apply_picture_filename),
                           (u'View Picture', self.view_picture_filename)]
@@ -304,7 +313,7 @@ class CaptureApp:
     def ave_captures_per_trap(self):
         return
     def switch_in(self, parent_dict = None):
-        if parent_dict is None:
+        if parent_dict is not None:
             self.parent_dict = parent_dict
         titlestr= u''
 #         if (self.selection == -1):
@@ -321,7 +330,7 @@ class CaptureApp:
                                         +','+str(self.parent_dict['ycoord'])
                                         +'):'+self.parent_dict['position'])
         else:
-            appuifw.app.title = u'ALL Captures'
+            appuifw.app.title = u'ALL Captures for this visit'
 
         # create menu:
         menu = [(u'Table',
@@ -355,9 +364,21 @@ class CaptureApp:
         # Fetch a list of previously saved captures:
         # TODO Try with 'id DESC'
 #        capture_iter = Captures.select(self.db, orderby='id DESC')
-        capture_iter = Captures.select(self.db, where='ima = '+str(self.parent_dict['ima']), orderby='id DESC') 
-        if not self.valid_parent_id():
-            capture_iter = Captures.select(self.db, orderby='id DESC')
+        where_query = u""
+        if self.valid_parent_id():
+            where_query = u"("
+            where_query += u"visit_id = " + str(self.parent_dict['id'])
+            where_query += ")"
+        else: # we must be viewing all captures for that trap
+            temp_dict = self.butterfly_app.trap_app.parent_dict
+            where_query = u"(site = '" + temp_dict['site'] + "'"
+            where_query += u" AND ima=" + str(temp_dict['ima'])
+            where_query += u" AND xcoord=" + str(temp_dict['xcoord'])
+            where_query += u" AND ycoord=" + str(temp_dict['ycoord'])
+            where_query += u" AND position='" + str(temp_dict['position']) + "'"
+            where_query += ')'
+            
+        capture_iter = Captures.select(self.db, where=where_query, orderby='id DESC') 
 #         if (self.selection == -2):
 #             capture_iter = Captures.select(self.db, where='(ima <> 1 AND ima <> 0)' )
         # For each row, Add an id number to the list
@@ -462,7 +483,8 @@ class CaptureApp:
             del temp_dict['id']
         except:
             pass
-        capture = Capture(self.db, temp_dict)
+        temp_dict['visit_id'] = self.parent_dict['id']
+        capture = Capture(self.db, **temp_dict)
         capture.execute_form()
         # At this point, user has exited form.
         

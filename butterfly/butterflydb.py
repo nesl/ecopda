@@ -77,6 +77,7 @@ class Captures(orm.Mapper):
         comments = orm.column(orm.String)
         picture_filename = orm.column(orm.String)
         audio_filename = orm.column(orm.String)
+        visit_id = orm.column(orm.Integer)
     def create_table(cls, db):
         q = u'CREATE TABLE ' + cls.__name__ + ' '
         q += '(id COUNTER,'
@@ -98,7 +99,8 @@ class Captures(orm.Mapper):
         q += 'identified_by VARCHAR,'
         q += 'comments LONG VARCHAR,'
         q += 'picture_filename VARCHAR,'
-        q += 'audio_filename VARCHAR)'
+        q += 'audio_filename VARCHAR,'
+        q += 'visit_id INTEGER)'
         db.execute(q)
         q = u'CREATE UNIQUE INDEX id_index ON '
         q += cls.__name__ + ' (id)'
