@@ -1,29 +1,25 @@
+import sys
+sys.path.append('e:\\python') #to properly find orm and keyboardimport thread
 import appuifw
 import e32
+import e32db
+import socket
+import time
+import string
+
+import orm
+import keyboard
+import butterflydb
+import capture
+import trap
+import site_ima
+import xy_position
+import attachment
 
 t = appuifw.Text()
 appuifw.body = t
 t.clear()
 t.add(u'Loading...')
-
-
-import e32db
-import sys
-sys.path.append('e:\\python') #to properly find orm and keyboard
-import butterflydb
-import capture
-import trap,site_ima,xy_position,attachment
-import thread
-
-def importRest():
-    time, orm, keyboard,socket,string = \
-    [ \
-        __import__('time'),
-        __import__('orm'),
-        __import__('keyboard'),
-        __import__('socket'),
-        __import__('string')]
-thread.start_new_thread(importRest,())
 
 # Create the application objects 
 class ButterflyApp:
