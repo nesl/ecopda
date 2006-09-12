@@ -39,7 +39,8 @@ def done():
   # reset the user name
   global user_name
   user_name = u''
-  splash_screen()
+  init_app()
+  #splash_screen()
   #exit_key_handler()
 
 def not_done():
@@ -185,7 +186,7 @@ def start_app():
   daff  = u'Demo Affiliation'
   nvis  = u'Number of Visitors'
   drate = u'Demo Rating'
-  comm  = u'One Word Comment'
+  comm  = u'One Word Tag'
   demoList = [yname, dname, dauth, daff, nvis, drate, comm]
   
   if user_name:
@@ -197,7 +198,7 @@ def start_app():
     current = questListBox.current()
     curr = demoList[current]
     if curr == yname:
-      user_name = appuifw.query(u'What is your name?', 'text')
+      user_name = appuifw.query(u'Please tell us your name.', 'text')
       if user_name <> None:
         demoList.pop(current)
         if len(demoList):
@@ -270,7 +271,7 @@ def start_app():
     elif curr == comm:
       demo_comm = u'a a'
       while len(demo_comm.split(u' ')) > 1:
-        demo_comm = appuifw.query(u'Give a one word comment.', 'text')
+        demo_comm = appuifw.query(u'What one word tag would you apply for this demo.', 'text')
         if demo_comm == None:
           break
       if demo_comm <> None:
@@ -334,8 +335,8 @@ def init_app():
 
   appuifw.app.body = textScreen
 
-#init_app()
-splash_screen()
+init_app()
+#splash_screen()
 app_lock.wait()
 appuifw.app.title = oldtitle
 appuifw.app.body = None
