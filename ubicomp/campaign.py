@@ -210,7 +210,7 @@ def start_app():
       demo_name_list = demo_name_list + [u'UbiCommunity', u'Barcode', u'WiRope', u'Pileus', u'BiblioRoll', u'LINC', u'AnonComm']
       demo_name_list = demo_name_list + [u'Push!Photo', u'UrbanCENS', u'HumanState', u'SpaceTracer', u'RWAttention', u'Flood']
       demo_name_list = demo_name_list + [u'Jetcam', u'Hullabaloo', u'iPoi', u'TinyObj', u'MedAware', u'SmartFuroshiki', u'WonderWall']
-      demo_name_list = demo_name_list + [u'MicroLearning', u'Spinal', u'Haggle', u'Crossroads']
+      demo_name_list = demo_name_list + [u'MicroLearning', u'Spinal', u'Haggle', u'Crossroads', u'Other']
  
       demo_name_index = appuifw.popup_menu(demo_name_list, u"Select the demo name and press ok.")
       if(demo_name_index in range(0, 30)):
