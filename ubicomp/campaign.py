@@ -185,7 +185,7 @@ def start_app():
   dauth = u'Demo Author'
   daff  = u'Demo Affiliation'
   nvis  = u'Number of Visitors'
-  drate = u'Demo Rating'
+  drate = u'Interest Rating'
   comm  = u'One Word Tag'
   demoList = [yname, dname, dauth, daff, nvis, drate, comm]
   
@@ -222,15 +222,6 @@ def start_app():
         if len(demoList):
           questListBox.set_list(demoList)
 
-      #demo_name_index = appuifw.selection_list(choices=demo_name_list, search_field=1)
-
-      #demo_name = appuifw.query(u'What is the name of the demo?', 'text')
-      #if demo_name <> None:
-      #  demoList.pop(current)
-      #  if len(demoList):
-      #    questListBox.set_list(demoList)
-        
-      
     elif curr == dauth:
       demo_auth = appuifw.query(u'Who is the author of the demo?', 'text')
       if demo_auth <> None:
@@ -258,7 +249,7 @@ def start_app():
     elif curr == drate:
       demo_rate = 11
       while demo_rate < 1 or demo_rate > 10:
-        demo_rate = appuifw.query(u'What is the rating of the demo? (1-10)', \
+        demo_rate = appuifw.query(u'How interesting is the demo? [ 1 - not, \n 5 - moderate, 10 - very ]', \
                                     'number', 1)
         if demo_rate == None:
           break
@@ -271,7 +262,7 @@ def start_app():
     elif curr == comm:
       demo_comm = u'a a'
       while len(demo_comm.split(u' ')) > 1:
-        demo_comm = appuifw.query(u'What one word tag would you apply for this demo.', 'text')
+        demo_comm = appuifw.query(u'Please give us a one word descriptive tag for the demo.', 'text')
         if demo_comm == None:
           break
       if demo_comm <> None:
