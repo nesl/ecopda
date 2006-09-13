@@ -4,7 +4,7 @@ import graphics
 
 app_lock = e32.Ao_lock()
 
-global user_name, demo_name, demo_auth, demo_affil
+global user_name, demo_name, demo_noval, demo_new
 global num_vis, demo_rate, demo_comm, image_file
 global image_dir, old_files, old_focus
 user_name = u''
@@ -47,13 +47,13 @@ def not_done():
   init_app()
 
 def continue_app():
-  global user_name, demo_name, demo_auth, demo_affil
+  global user_name, demo_name, demo_noval, demo_new
   global num_vis, demo_rate, demo_comm, image_file
 
   user_name = user_name.replace(',', '_')
   demo_name = demo_name.replace(',', '_')
-  demo_auth = demo_auth.replace(',', '_')
-  demo_affil = demo_affil.replace(',', '_')
+  demo_noval = demo_noval.replace(',', '_')
+  demo_new = demo_new.replace(',', '_')
   demo_comm = demo_comm.replace(',', '_')
   
   continueScreen = appuifw.Text()
@@ -70,7 +70,8 @@ def continue_app():
 
   datasentScreen = appuifw.Text()
   datasentScreen.add(u'Great job, ' + user_name + u'!')
-  datasentScreen.add(u'\n\nPlease wait while we slog your data.')  
+  datasentScreen.add(u'\n\nWe will slog your data now.')  
+  datasentScreen.add(u'\nThis might take a couple of mins.')
 
   appuifw.app.body = datasentScreen
 
@@ -91,8 +92,8 @@ def continue_app():
   xml += '<row>'
   xml += '<field name="User_Name">' + user_name + '</field>'
   xml += '<field name="Demo_Name">' + demo_name + '</field>'
-  xml += '<field name="Demo_Author">' + demo_auth + '</field>'
-  xml += '<field name="Affilliation">' + demo_affil + '</field>'
+  xml += '<field name="Demo_Author">' + demo_noval + '</field>'
+  xml += '<field name="Affilliation">' + demo_new + '</field>'
   xml += '<field name="Num_Of_Visitors">' + str(num_vis) + '</field>'
   xml += '<field name="Rate_Of_Demo">' + str(demo_rate) + '</field>'
   xml += '<field name="Comment">' + demo_comm + '</field>'
@@ -163,9 +164,9 @@ def get_image():
   global user_name
   global image_dir, old_files, old_focus
   imageScreen = appuifw.Text()
-  imageScreen.add(u'Hi ' + user_name + ',\n')
-  imageScreen.add(u'  Great job collecting that information.')
-  imageScreen.add(u' Now please take a representative image of the demo that shows its uniqueness or value.')
+  imageScreen.add(u'Hi ' + user_name + '.\n\n')
+  imageScreen.add(u'Great job collecting that information.\n\n')
+  imageScreen.add(u'Now please take a representative image of the demo that shows its uniqueness or value.')
   imageScreen.add(u'\n\nPress and hold the camera button to start capture.')
   image_dir = dir_iter.Directory_iter([u'e:\\Images',])
   image_dir.add(0)
@@ -177,23 +178,23 @@ def get_image():
   
 
 def start_app():
-  global user_name, demo_name, demo_auth, demo_affil
+  global user_name, demo_name, demo_noval, demo_new
   global num_vis, demo_rate, demo_comm, image_file
   
   yname = u'Your Name'
   dname = u'Demo Name'
-  dauth = u'Demo Author'
-  daff  = u'Demo Affiliation'
+  dnoval = u'Noval Attribute'
+  dnew  = u'New Knowledge'
   nvis  = u'Number of Visitors'
   drate = u'Interest Rating'
   comm  = u'One Word Tag'
-  demoList = [yname, dname, dauth, daff, nvis, drate, comm]
+  demoList = [yname, dname, dnoval, dnew, nvis, drate, comm]
   
   if user_name:
     demoList.pop(0)
   
   def edit():
-    global user_name, demo_name, demo_auth, demo_affil
+    global user_name, demo_name, demo_noval, demo_new
     global num_vis, demo_rate, demo_comm, image_file
     current = questListBox.current()
     curr = demoList[current]
@@ -222,17 +223,17 @@ def start_app():
         if len(demoList):
           questListBox.set_list(demoList)
 
-    elif curr == dauth:
-      demo_auth = appuifw.query(u'Who is the author of the demo?', 'text')
-      if demo_auth <> None:
+    elif curr == dnoval:
+      demo_noval = appuifw.query(u'Tell us what is noval about the demo.', 'text')
+      if demo_noval <> None:
         demoList.pop(current)
         if len(demoList):
           questListBox.set_list(demoList)
         
       
-    elif curr == daff:
-      demo_affil = appuifw.query(u'What is the demo affiliation?', 'text')
-      if demo_affil <> None:
+    elif curr == dnew:
+      demo_new = appuifw.query(u'Tell us something new you learned from talking to the author.', 'text')
+      if demo_new <> None:
         demoList.pop(current)
         if len(demoList):
           questListBox.set_list(demoList)
@@ -291,12 +292,12 @@ def splash_screen():
   c.bind(EKeySelect, init_app)
 
 def init_app():
-  global user_name, demo_name, demo_auth, demo_affil
+  global user_name, demo_name, demo_noval, demo_new
   global num_vis, demo_rate, demo_comm, image_file
 
   demo_name = u''
-  demo_auth = u''
-  demo_affil = u''
+  demo_noval = u''
+  demo_new = u''
   num_vis = 0
   demo_rate = 1
   demo_comm = u''
@@ -305,11 +306,17 @@ def init_app():
   title = u'UCLA UrbanCENS'
   if (user_name == u''):
     intro = u'Welcome.'
+    intro += u'Today, our campaign is to document other Ubicomp demos.'
+    intro += u'\n\nIn the process, we hope to:\n'
+    intro += u'\n- encourage interaction with authors'
+    intro += u'\n- get user perspectives on demos'
+    intro += u'\n- show partisans in action'
   else:
-    intro = u'Welcome back, ' + user_name + u'.'
-  intro += u' Today, our campaign is to document other Ubicomp demos.'
-  intro += u' Your input will be used to find the best demos, most popular demos, and document comments about each demo.'
-  cont = u'Press the center joystick button to start.'
+    intro = u'Welcome back, ' + user_name + u'.\n'
+    intro += u'Thanks for documenting that last demo. '
+    intro += u'When you are ready, lets document another.'
+
+  cont = u'Press the center joystick to start.'
   
   textScreen = appuifw.Text()
   
