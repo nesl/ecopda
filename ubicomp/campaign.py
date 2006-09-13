@@ -4,7 +4,7 @@ import graphics
 
 app_lock = e32.Ao_lock()
 
-global user_name, demo_name, demo_noval, demo_new
+global user_name, demo_name, demo_novel, demo_new
 global num_vis, demo_rate, demo_comm, image_file
 global image_dir, old_files, old_focus
 user_name = u''
@@ -47,12 +47,12 @@ def not_done():
   init_app()
 
 def continue_app():
-  global user_name, demo_name, demo_noval, demo_new
+  global user_name, demo_name, demo_novel, demo_new
   global num_vis, demo_rate, demo_comm, image_file
 
   user_name = user_name.replace(',', '_')
   demo_name = demo_name.replace(',', '_')
-  demo_noval = demo_noval.replace(',', '_')
+  demo_novel = demo_novel.replace(',', '_')
   demo_new = demo_new.replace(',', '_')
   demo_comm = demo_comm.replace(',', '_')
   
@@ -71,7 +71,7 @@ def continue_app():
   datasentScreen = appuifw.Text()
   datasentScreen.add(u'Great job, ' + user_name + u'!')
   datasentScreen.add(u'\n\nWe will slog your data now.')  
-  datasentScreen.add(u'\nThis might take a couple of mins.')
+  datasentScreen.add(u'\n\nThis might take a couple of mins.')
 
   appuifw.app.body = datasentScreen
 
@@ -92,8 +92,8 @@ def continue_app():
   xml += '<row>'
   xml += '<field name="User_Name">' + user_name + '</field>'
   xml += '<field name="Demo_Name">' + demo_name + '</field>'
-  xml += '<field name="Demo_Author">' + demo_noval + '</field>'
-  xml += '<field name="Affilliation">' + demo_new + '</field>'
+  xml += '<field name="Demo_Novel">' + demo_novel + '</field>'
+  xml += '<field name="Demo_New">' + demo_new + '</field>'
   xml += '<field name="Num_Of_Visitors">' + str(num_vis) + '</field>'
   xml += '<field name="Rate_Of_Demo">' + str(demo_rate) + '</field>'
   xml += '<field name="Comment">' + demo_comm + '</field>'
@@ -108,8 +108,8 @@ def continue_app():
   params['pw']='intel'
   params['data_string']=xml
   params['type']='xml'   
-  params['project_id']="22"
-  params['tableName']='demoData'
+  params['project_id']="39"
+  params['tableName']='ubicompDemo'
 
   t1 = time.time()
   params = urllib.urlencode(params)
@@ -178,23 +178,23 @@ def get_image():
   
 
 def start_app():
-  global user_name, demo_name, demo_noval, demo_new
+  global user_name, demo_name, demo_novel, demo_new
   global num_vis, demo_rate, demo_comm, image_file
   
   yname = u'Your Name'
   dname = u'Demo Name'
-  dnoval = u'Noval Attribute'
+  dnovel = u'Novel Attribute'
   dnew  = u'New Knowledge'
   nvis  = u'Number of Visitors'
   drate = u'Interest Rating'
   comm  = u'One Word Tag'
-  demoList = [yname, dname, dnoval, dnew, nvis, drate, comm]
+  demoList = [yname, dname, dnovel, dnew, nvis, drate, comm]
   
   if user_name:
     demoList.pop(0)
   
   def edit():
-    global user_name, demo_name, demo_noval, demo_new
+    global user_name, demo_name, demo_novel, demo_new
     global num_vis, demo_rate, demo_comm, image_file
     current = questListBox.current()
     curr = demoList[current]
@@ -223,9 +223,9 @@ def start_app():
         if len(demoList):
           questListBox.set_list(demoList)
 
-    elif curr == dnoval:
-      demo_noval = appuifw.query(u'Tell us what is noval about the demo.', 'text')
-      if demo_noval <> None:
+    elif curr == dnovel:
+      demo_novel = appuifw.query(u'Tell us what is novel about the demo.', 'text')
+      if demo_novel <> None:
         demoList.pop(current)
         if len(demoList):
           questListBox.set_list(demoList)
@@ -292,11 +292,11 @@ def splash_screen():
   c.bind(EKeySelect, init_app)
 
 def init_app():
-  global user_name, demo_name, demo_noval, demo_new
+  global user_name, demo_name, demo_novel, demo_new
   global num_vis, demo_rate, demo_comm, image_file
 
   demo_name = u''
-  demo_noval = u''
+  demo_novel = u''
   demo_new = u''
   num_vis = 0
   demo_rate = 1
