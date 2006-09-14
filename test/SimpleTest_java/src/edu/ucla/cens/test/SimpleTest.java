@@ -12,6 +12,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.util.Vector;
+
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.lcdui.*;
@@ -21,6 +23,7 @@ import javax.microedition.media.control.*;
 
 public class SimpleTest extends MIDlet implements CommandListener {
 	byte[] output = null; 
+	Vector power = new Vector();
 	private HelloCanvas myCanvas;
 	private Form myForm;
 	private Gauge myGauge;
@@ -57,7 +60,8 @@ public class SimpleTest extends MIDlet implements CommandListener {
 	}
 
 	protected void startApp() throws MIDletStateChangeException {
-		Display.getDisplay(this).setCurrent(myForm);
+		Display.getDisplay(this).setCurrent(myCanvas);
+		myCanvas.start();
 	}
 
 	public void commandAction(Command c, Displayable d) {
@@ -133,6 +137,11 @@ public class SimpleTest extends MIDlet implements CommandListener {
 			this.output = tempoutput.toByteArray();
 			tempoutput.close();
 			double noiseLevel = this.getNoiseLevel();
+			if (this.power.size() > 20)
+			{
+				this.power.removeAllElements();
+			}
+			this.power.addElement(new Double(noiseLevel));
 			this.alertError("Done recording:"+String.valueOf(noiseLevel));
 		} catch (IOException ioe) {
 			
