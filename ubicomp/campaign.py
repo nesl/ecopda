@@ -50,12 +50,40 @@ def continue_app():
   global user_name, demo_name, demo_novel, demo_new
   global num_vis, demo_rate, demo_comm, image_file
 
-  user_name = user_name.replace(',', '_')
-  demo_name = demo_name.replace(',', '_')
-  demo_novel = demo_novel.replace(',', '_')
-  demo_new = demo_new.replace(',', '_')
-  demo_comm = demo_comm.replace(',', '_')
-  
+  datasentScreen = appuifw.Text()
+  datasentScreen.add(u'Great job, ' + user_name + u'!')
+  datasentScreen.add(u'\n\nWe will slog your data now.')  
+  datasentScreen.add(u'\n\nThis might take a couple of mins.')
+  datasentScreen.add(u'\nData will be encoded, wrapped in xml, and sent.')
+
+  appuifw.app.body = datasentScreen
+
+  user_name_filtered  = user_name.replace(',', '_')
+  demo_name_filtered  = demo_name.replace(',', '_')
+  demo_novel_filtered = demo_novel.replace(',', '_')
+  demo_new_filtered   = demo_new.replace(',', '_')
+  demo_comm_filtered  = demo_comm.replace(',', '_')
+
+  for chr in user_name_filtered:
+	if ord(chr) not in range(0, 128):
+		user_name_filtered = user_name_filtered.replace(chr, '_')
+
+  for chr in demo_name_filtered:
+        if ord(chr) not in range(0, 128):
+                demo_name_filtered = demo_name_filtered.replace(chr, '_')
+
+  for chr in demo_novel_filtered:
+        if ord(chr) not in range(0, 128):
+                demo_novel_filtered = demo_novel_filtered.replace(chr, '_')
+
+  for chr in demo_new_filtered:
+        if ord(chr) not in range(0, 128):
+                demo_new_filtered = demo_new_filtered.replace(chr, '_')
+
+  for chr in demo_comm_filtered:
+        if ord(chr) not in range(0, 128):
+                demo_comm_filtered = demo_comm_filtered.replace(chr, '_')
+
   continueScreen = appuifw.Text()
   continueScreen.add(u'Are you done, ' + user_name + u'?')
   continueScreen.add(u'\n\nIf so, please return the equipment back to UrbanCENS.')
@@ -68,21 +96,12 @@ def continue_app():
   continueScreen.bind(EKeyEdit, done)
   continueScreen.bind(EKeyBackspace, not_done)
 
-  datasentScreen = appuifw.Text()
-  datasentScreen.add(u'Great job, ' + user_name + u'!')
-  datasentScreen.add(u'\n\nWe will slog your data now.')  
-  datasentScreen.add(u'\n\nThis might take a couple of mins.')
-
-  appuifw.app.body = datasentScreen
-
   date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
-  t1 = time.time()
   image_output = StringIO.StringIO()
   image_input = open(image_file, "rb")
   base64.encode(image_input, image_output)
   image_data = image_output.getvalue()
-  t2 = time.time()
 
   #print 'Image Base 64 Time %0.3fms' % ((t2-t1)*1000.)
   datasentScreen.add(u'\n\nData encoded...')
@@ -90,13 +109,13 @@ def continue_app():
   xml = '<?xml version="1.0" encoding="UTF-8"?>'
   xml += '<table>'
   xml += '<row>'
-  xml += '<field name="User_Name">' + user_name + '</field>'
-  xml += '<field name="Demo_Name">' + demo_name + '</field>'
-  xml += '<field name="Demo_Novel">' + demo_novel + '</field>'
-  xml += '<field name="Demo_New">' + demo_new + '</field>'
+  xml += '<field name="User_Name">' + user_name_filtered + '</field>'
+  xml += '<field name="Demo_Name">' + demo_name_filtered + '</field>'
+  xml += '<field name="Demo_Novel">' + demo_novel_filtered + '</field>'
+  xml += '<field name="Demo_New">' + demo_new_filtered + '</field>'
   xml += '<field name="Num_Of_Visitors">' + str(num_vis) + '</field>'
   xml += '<field name="Rate_Of_Demo">' + str(demo_rate) + '</field>'
-  xml += '<field name="Comment">' + demo_comm + '</field>'
+  xml += '<field name="Comment">' + demo_comm_filtered + '</field>'
   xml += '<field name="Image">' + image_data + '</field>'
   #xml += '<field name="Image">' + 'abc' + '</field>'
   xml += '<field name="Date_Time">' + date_time + '</field>'
@@ -111,27 +130,23 @@ def continue_app():
   params['project_id']="39"
   params['tableName']='ubicompDemo'
 
-  t1 = time.time()
   params = urllib.urlencode(params)
-  t2 = time.time()
 
   #print 'URL Encode Time %0.3fms' % ((t2-t1)*1000.)
-  datasentScreen.add(u'\n\nXML encoded...')
+  datasentScreen.add(u'\nXML encoded...')
 
   headers = {}
   headers['Content-type']='application/x-www-form-urlencoded'
   headers['Accept']='text/plain'
 
-  t1 = time.time()
   conn = httplib.HTTPConnection("sensorbase.org")
   conn.request("POST", "/alpha/upload.php", params, headers)
   response = conn.getresponse()
   responseText = response.read()
   conn.close()
-  t2 = time.time()
 
   #print 'HTTP Post Time %0.3fms' % ((t2-t1)*1000.)
-  datasentScreen.add(u'\n\nHTTP POST...')
+  datasentScreen.add(u'\nHTTP POST...')
   e32.ao_sleep(1)
 
   #print responseText
