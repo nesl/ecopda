@@ -5,6 +5,8 @@ import javax.microedition.lcdui.*;
 public class HelloCanvas extends Canvas {
 	boolean myCanvasTXT = true;
 	SimpleTest midlet = null;
+	private double ave = 0;
+	private double peak = 0;
 	HelloCanvas(SimpleTest midlet)
 	{
 		this.midlet = midlet;
@@ -34,22 +36,27 @@ public class HelloCanvas extends Canvas {
 		g.setColor(0x00ff0000);
 		g.setFont(font);
 //			//write the strings in the center of the screen
-		g.drawString("Elements:" + this.midlet.power.size(), (w-fontWidth)/2, (h-fontHeight)/2, Graphics.TOP | Graphics.LEFT);
+		double ave = 0;
+		double peak = 0;
+		g.drawString("Ave: " + this.ave + "\nPeak: " + this.peak, (w-fontWidth)/2, (h-fontHeight)/2, Graphics.TOP | Graphics.LEFT);
+//		g.drawString("Elements:" + this.midlet.power.size(), (w-fontWidth)/2, (h-fontHeight)/2, Graphics.TOP | Graphics.LEFT);
 //		}	
 	}
 	private void pointHistogram(Graphics g)
 	{
-		g.setColor(0xff000000);
-		g.fillRect(50, 50, 100, 100);
+		int MYSIZE = 30;
+		//g.setColor(0xff000000);
+		//g.fillRect(50, 50, 100, 100);
 		g.setColor(0x0000ff00);
 		int w = getWidth();
 		if (midlet.power.size() > 0)
 		{
-			 Double foo = new Double((1.0*w) / (1.0* midlet.power.size()));
+			 Double foo = new Double((1.0*w) / (1.0* MYSIZE));
 			 w = foo.intValue();
 		}
 		int h = getHeight();
 		double max = 0;
+		double sum = 0;
 		for (int i = 0; i < midlet.power.size(); ++i)
 		{
 			double val = ((Double)midlet.power.elementAt(i)).doubleValue();
@@ -58,6 +65,7 @@ public class HelloCanvas extends Canvas {
 			{
 				max = val;
 			}
+			sum += val;
 		}
 		for (int i = 0; i < midlet.power.size(); ++i)
 		{
@@ -66,5 +74,10 @@ public class HelloCanvas extends Canvas {
 			Double dval = new Double(val);
 			g.fillRect(i * w,h - dval.intValue(),w, dval.intValue());
 		}
+		this.ave = sum / midlet.power.size();
+		this.peak = max;
+		g.setColor(0xfff);
+		Double dave = new Double(h - ave * ((1.0*h)/max));
+		g.fillRect(0, dave.intValue(), getWidth(), 3);
 	}
 }

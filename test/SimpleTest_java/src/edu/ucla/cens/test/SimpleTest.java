@@ -6,7 +6,7 @@ package edu.ucla.cens.test;
 //import javax.microedition.midlet.MIDlet;
 //import javax.microedition.midlet.MIDletStateChangeException;
 
-
+import java.lang.Thread;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -21,9 +21,29 @@ import javax.microedition.midlet.*;
 import javax.microedition.media.*;
 import javax.microedition.media.control.*;
 
-public class SimpleTest extends MIDlet implements CommandListener {
-	byte[] output = null; 
-	Vector power = new Vector();
+public class SimpleTest extends MIDlet implements CommandListener, PlayerListener {
+	
+	private class SimpleTestHelper implements Runnable {
+		private SimpleTest midlet = null;
+		SimpleTestHelper(SimpleTest midlet) {
+			this.midlet = midlet;
+		}
+		public void run() {
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException ie) {
+				midlet.alertError("InterruptedException while sleeping:"+ie.getMessage());
+			}
+			this.midlet.playerUpdate(null, "FOO", null);
+		}
+	}
+	private Thread myThread = null;
+	private Player p = null;
+	private ByteArrayOutputStream tempoutput = null;
+	private RecordControl rc = null;
+	public byte[] output = null; 
+	public Vector power = new Vector();
 	private HelloCanvas myCanvas;
 	private Form myForm;
 	private Gauge myGauge;
@@ -122,37 +142,63 @@ public class SimpleTest extends MIDlet implements CommandListener {
 	
 	public void recordCallback2()
 	{
+		//this.alertError("recordCallback2");
 		try
 		{
-			Player p = Manager.createPlayer("capture://audio?encoding=pcm");
+			p = Manager.createPlayer("capture://audio?encoding=pcm");
+			tempoutput = new ByteArrayOutputStream();
 			p.realize();
-			RecordControl rc = (RecordControl)p.getControl("RecordControl");
-			ByteArrayOutputStream tempoutput = new ByteArrayOutputStream();
+			p.addPlayerListener(this);
+//			StopTimeControl sc = (StopTimeControl) p.getControl("StopTimeControl");
+//			if (sc!= null)
+//			{
+//				//this is in microseconds
+//				sc.setStopTime(1000000);
+//			}
+			rc = (RecordControl)p.getControl("RecordControl");
 			rc.setRecordStream(tempoutput);
+			//rc.setRecordSizeLimit(100000);
 			rc.startRecord();
 			p.start();
-			Thread.sleep(2000);
-			rc.commit();
-			p.close();
-			this.output = tempoutput.toByteArray();
-			tempoutput.close();
-			double noiseLevel = this.getNoiseLevel();
-			if (this.power.size() > 20)
-			{
-				this.power.removeAllElements();
-			}
-			this.power.addElement(new Double(noiseLevel));
-			this.alertError("Done recording:"+String.valueOf(noiseLevel));
+			myThread = new Thread(new SimpleTestHelper(this));
+			myThread.start();
+
+
 		} catch (IOException ioe) {
-			
+			this.alertError("IOException in recordCallback2:" + ioe.getMessage());
 		} catch (MediaException me) {
-			
-		} catch (InterruptedException ie) {
-			
-		}
-		
+			this.alertError("MediaException in recordCallback2:" + me.getMessage());
+		} 
+
 	}
-	
+
+	// This is the callback for PlayerListener
+	public void playerUpdate(Player p, String event, Object eventData)
+	{
+		//this.alertError("In playerUpdate: event is" + event);
+		try
+		{
+			if (event.equals("FOO") ) 
+			{
+				//this.alertError("playerUpdate: event was FOO");
+				this.rc.commit();
+				this.p.close();
+				this.output = tempoutput.toByteArray();
+				this.tempoutput.close();
+				double noiseLevel = this.getNoiseLevel();
+				if (this.power.size() >= 30)
+				{
+					this.power.removeElementAt(0);
+					//this.power.removeAllElements();
+				} 
+				this.power.addElement(new Double(noiseLevel));
+				this.myCanvas.repaint();
+				this.recordCallback2();
+			}
+		} catch (Exception e) {
+			this.alertError("Exception in handing FOO:"+e.getMessage());
+		}
+	}
 	public void recordCallback()
 	{
 		try 
