@@ -264,25 +264,25 @@ public class SimpleTest extends MIDlet implements CommandListener {
 	{
 		long sum = 0;
 		try {
-			FileConnection fc = this.createFC("file:///E:/soundfile.txt", true);
-			OutputStream os = fc.openOutputStream();
-			os.write(output);
+			//FileConnection fc = this.createFC("file:///E:/soundfile.txt", true);
+			//OutputStream os = fc.openOutputStream();
+			//os.write(output);
 			for (int i = 44; i < this.output.length; i += 2)
 			{
 				//String currentByte = String.valueOf(output[i]) + "\n";
 				//os.write(currentByte.getBytes());
 				//sum +=  java.lang.Math.abs(this.output[i] - 128);
 				short val = SimpleTest.byteArrayToShort(this.output, i);
-				String currentInt = String.valueOf(val) + "\n";
-				os.write(currentInt.getBytes());
-				sum += val;
+				//String currentInt = String.valueOf(val) + "\n";
+				//os.write(currentInt.getBytes());
+				sum += val * val;
 			}
-			os.close();
-			fc.close();
-		} catch (IOException e) {
+			//os.close();
+			//fc.close();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return sum/this.output.length;
+		return (1.0 * sum)/this.output.length;
 	}
 	 /**
      * Convert the byte array to an int starting from the given offset.
