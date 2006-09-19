@@ -36,8 +36,6 @@ public class HelloCanvas extends Canvas {
 		g.setColor(0x00ff0000);
 		g.setFont(font);
 //			//write the strings in the center of the screen
-		double ave = 0;
-		double peak = 0;
 		g.drawString("Ave: " + this.ave + "\nPeak: " + this.peak, (w-fontWidth)/2, (h-fontHeight)/2, Graphics.TOP | Graphics.LEFT);
 //		g.drawString("Elements:" + this.midlet.power.size(), (w-fontWidth)/2, (h-fontHeight)/2, Graphics.TOP | Graphics.LEFT);
 //		}	
