@@ -10,7 +10,6 @@ import java.lang.Thread;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.InputStream;
 import java.util.Vector;
 
@@ -38,6 +37,7 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 			this.midlet.playerUpdate(null, "FOO", null);
 		}
 	}
+	
 	private Thread myThread = null;
 	private Player p = null;
 	private ByteArrayOutputStream tempoutput = null;
@@ -55,20 +55,24 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 	private Command showCommand = new Command("Show Levels", Command.SCREEN, 1);
 	private Command recordCommand = new Command("Record", Command.SCREEN, 1);
 	private Command playCommand = new Command("Play", Command.SCREEN,1);
+	
 	public SimpleTest(){
 		myCanvas = new HelloCanvas(this);
 		myCanvas.addCommand(backCommand);
 		myCanvas.addCommand(messageCommand);
 		myCanvas.addCommand(playCommand);
 		myCanvas.addCommand(recordCommand);
+		
 		myForm = new Form("Gauge level");
 		myGauge = new Gauge("Value", true, 120, 10);
 		textField = new TextField("Enter number", "", 3, TextField.NUMERIC);
+		
 		myForm.append(myGauge);
 		myForm.append(textField);
 		myForm.addCommand(showCommand);
 		myForm.addCommand(displayCommand);
 		myForm.addCommand(exitCommand);
+		
 		myCanvas.setCommandListener(this);
 		myForm.setCommandListener(this);
 	}
@@ -140,7 +144,7 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 		return fconn;
 	}
 	
-	public void recordCallback2()
+	private void recordCallback2()
 	{
 		//this.alertError("recordCallback2");
 		try
@@ -197,66 +201,6 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 			}
 		} catch (Exception e) {
 			this.alertError("Exception in handing FOO:"+e.getMessage());
-		}
-	}
-	public void recordCallback()
-	{
-		try 
-		{
-			String SNDFILE = "file:///E:/audio.wav";
-			FileConnection fconn = null;
-			OutputStream outStream = null;
-			Player p = null;
-			RecordControl rc = null;
-			
-			// create a datasource that captures live audio
-			p = Manager.createPlayer("capture://audio");
-			p.realize();
-			rc = (RecordControl)p.getControl("RecordControl");
-			fconn = this.createFC(SNDFILE, true);
-			if (fconn == null)
-			{
-				this.alertError("fconn was null");
-				return;
-			}
-						
-			try {
-				outStream = fconn.openDataOutputStream();
-			} 
-			catch (IOException e) {
-				this.alertError("Can't open output stream for:" + SNDFILE + "/n" + e);
-				return;				
-			}
-
-			rc.setRecordStream(outStream);
-			rc.startRecord();
-			p.start();
-			Thread.sleep(5000);
-			p.stop();
-			rc.stopRecord();
-			rc.commit();
-
-
-			try {
-				outStream.close();
-			} catch (IOException e) {
-				this.alertError("Error while closing stream:" + SNDFILE + "/n" + e.getMessage());
-				return;
-			}
-
-			try {
-				fconn.close();
-			} catch (IOException e) {
-				this.alertError("Error while closing file:" + SNDFILE + "/n" + e);
-				return;
-			}
-			this.alertError("Acoustic data written to " + SNDFILE);
-		} catch (IOException e) {
-			this.alertError("IOException: " + e.getMessage());
-		} catch(MediaException e) {
-			this.alertError("MediaException: " + e.getMessage());
-		} catch(InterruptedException e) {
-			this.alertError("InterruptedException: " + e.getMessage());
 		}
 	}
 
