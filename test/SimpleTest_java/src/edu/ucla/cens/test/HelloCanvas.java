@@ -21,35 +21,35 @@ public class HelloCanvas extends Canvas {
 		repaint();
 	}
 	
+	// This draws the screen.
+	// It calls this.pointHistogram to draw the graph.
+	// It displays the message "CANVAS FONT".
+	// It displays Ave and Peek.
 	protected void paint(Graphics g) {
 		int w = getWidth();
 		int h = getHeight();
 		g.setColor(0xffff00);
 		g.fillRect(0, 0, w, h);
 		this.pointHistogram(g);
-//		display the message
-//		if(myCanvasTXT){
+		// display the message
 		Font font = g.getFont();
 		int fontHeight = font.getHeight();
 		int fontWidth = font.stringWidth("CANVAS FONT");
-//			//set the text color
+		// set the text color
 		g.setColor(0x00ff0000);
 		g.setFont(font);
-//			//write the strings in the center of the screen
-		g.drawString("Ave: " + this.ave + "\nPeak: " + this.peak, (w-fontWidth)/2, (h-fontHeight)/2, Graphics.TOP | Graphics.LEFT);
-//		g.drawString("Elements:" + this.midlet.power.size(), (w-fontWidth)/2, (h-fontHeight)/2, Graphics.TOP | Graphics.LEFT);
-//		}	
+		// write the strings in the center of the screen
+		g.drawString("Ave: " + this.ave + "\nPeak: " + this.peak, (w-fontWidth)/2, (h-fontHeight)/2, Graphics.TOP | Graphics.LEFT);	
 	}
+	
 	private void pointHistogram(Graphics g)
 	{
 		int MYSIZE = 30;
-		//g.setColor(0xff000000);
-		//g.fillRect(50, 50, 100, 100);
 		g.setColor(0x0000ff00);
 		int w = getWidth();
 		if (midlet.power.size() > 0)
 		{
-			 Double foo = new Double((1.0*w) / (1.0* MYSIZE));
+			 Double foo = new Double((1.0 * w) / (1.0 * MYSIZE));
 			 w = foo.intValue();
 		}
 		int h = getHeight();

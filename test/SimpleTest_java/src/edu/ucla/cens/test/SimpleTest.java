@@ -24,17 +24,21 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 	
 	private class SimpleTestHelper implements Runnable {
 		private SimpleTest midlet = null;
-		SimpleTestHelper(SimpleTest midlet) {
+		private int sleepMS = 0;
+		String msg = null;
+		SimpleTestHelper(SimpleTest midlet, int sleepMS, String msg) {
 			this.midlet = midlet;
+			this.sleepMS = sleepMS;
+			this.msg = msg;
 		}
 		public void run() {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(this.sleepMS);
 			}
 			catch (InterruptedException ie) {
 				midlet.alertError("InterruptedException while sleeping:"+ie.getMessage());
 			}
-			this.midlet.playerUpdate(null, "FOO", null);
+			this.midlet.playerUpdate(null, msg, null);
 		}
 	}
 	
@@ -46,7 +50,8 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 	public Vector power = new Vector();
 	private HelloCanvas myCanvas;
 	private Form myForm;
-	private Gauge myGauge;
+	private Gauge myGaugeTotal;
+	private Gauge myGaugeShared;
 	private TextField textField;
 	private Command backCommand = new Command("Back", Command.BACK, 1);
 	private Command messageCommand = new Command("Message", Command.SCREEN,1);
@@ -56,6 +61,8 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 	private Command recordCommand = new Command("Record", Command.SCREEN, 1);
 	private Command playCommand = new Command("Play", Command.SCREEN,1);
 	
+	// This is the constructor method.
+	// It creates a Canvas and a Form object.
 	public SimpleTest(){
 		myCanvas = new HelloCanvas(this);
 		myCanvas.addCommand(backCommand);
@@ -64,10 +71,12 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 		myCanvas.addCommand(recordCommand);
 		
 		myForm = new Form("Gauge level");
-		myGauge = new Gauge("Value", true, 120, 10);
+		myGaugeTotal = new Gauge("Total Window Size (ms)", true, 1000, 1000);
+		myGaugeShared = new Gauge("Shared Window Size (ms)", true, 1000, 100);
 		textField = new TextField("Enter number", "", 3, TextField.NUMERIC);
 		
-		myForm.append(myGauge);
+		myForm.append(myGaugeTotal);
+		myForm.append(myGaugeShared);
 		myForm.append(textField);
 		myForm.addCommand(showCommand);
 		myForm.addCommand(displayCommand);
@@ -88,6 +97,7 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 		myCanvas.start();
 	}
 
+	// This is a callback for the softkey menu
 	public void commandAction(Command c, Displayable d) {
 		if (c == exitCommand){
 			notifyDestroyed();
@@ -98,26 +108,27 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 		if (c == backCommand){	
 			Display.getDisplay(this).setCurrent(myForm);
 		}	
-		if (c== displayCommand){
+		if (c == displayCommand){
 			Display.getDisplay(this).setCurrent(myCanvas);
 			myCanvas.start();
 		}
-		if (c==showCommand){
+		if (c == showCommand){
 			String valueString = textField.getString();
 			int value = 0;
 			if (!valueString.equals("")) { 
 				value = Integer.parseInt(valueString);
 			}
-			myGauge.setValue(value);
+			myGaugeTotal.setValue(value);
 		}
-		if (c==recordCommand) {
+		if (c == recordCommand) {
 			recordCallback2(); 
 		}
-		if (c==playCommand) {
+		if (c == playCommand) {
 			playCallback2();
 		}
 	}
 	
+	// All this code is to create a FileConnection. :P
 	private FileConnection createFC(String arg, boolean write)
 	{
 		FileConnection fconn = null;
@@ -144,6 +155,10 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 		return fconn;
 	}
 	
+	// This is the callback for when the user selects "Record".
+	// It creates a player...
+	// starts recording...
+	// and creates a thread that will later stop the recording.
 	private void recordCallback2()
 	{
 		//this.alertError("recordCallback2");
@@ -153,38 +168,26 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 			tempoutput = new ByteArrayOutputStream();
 			p.realize();
 			p.addPlayerListener(this);
-//			StopTimeControl sc = (StopTimeControl) p.getControl("StopTimeControl");
-//			if (sc!= null)
-//			{
-//				//this is in microseconds
-//				sc.setStopTime(1000000);
-//			}
 			rc = (RecordControl)p.getControl("RecordControl");
 			rc.setRecordStream(tempoutput);
-			//rc.setRecordSizeLimit(100000);
 			rc.startRecord();
 			p.start();
-			myThread = new Thread(new SimpleTestHelper(this));
+			myThread = new Thread(new SimpleTestHelper(this, this.myGaugeShared.getValue(), "SHARED"));
 			myThread.start();
-
-
 		} catch (IOException ioe) {
 			this.alertError("IOException in recordCallback2:" + ioe.getMessage());
 		} catch (MediaException me) {
 			this.alertError("MediaException in recordCallback2:" + me.getMessage());
 		} 
-
 	}
 
 	// This is the callback for PlayerListener
 	public void playerUpdate(Player p, String event, Object eventData)
 	{
-		//this.alertError("In playerUpdate: event is" + event);
 		try
 		{
-			if (event.equals("FOO") ) 
+			if (event.equals("SHARED") ) 
 			{
-				//this.alertError("playerUpdate: event was FOO");
 				this.rc.commit();
 				this.p.close();
 				this.output = tempoutput.toByteArray();
@@ -193,10 +196,15 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 				if (this.power.size() >= 30)
 				{
 					this.power.removeElementAt(0);
-					//this.power.removeAllElements();
 				} 
 				this.power.addElement(new Double(noiseLevel));
 				this.myCanvas.repaint();
+				int sleepMS = this.myGaugeTotal.getValue() - this.myGaugeShared.getValue();
+				if (sleepMS < 0) { sleepMS = 0; }
+				myThread = new Thread(new SimpleTestHelper(this, sleepMS , "TOTAL"));
+			}
+			else if (event.equalsIgnoreCase("TOTAL"))
+			{
 				this.recordCallback2();
 			}
 		} catch (Exception e) {
@@ -216,6 +224,62 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 		catch (IOException io) {}
 	}
 	
+	public void alertError(String message)
+    {
+        Alert alert = new Alert("Error", message, null, AlertType.ERROR);
+        Display display = Display.getDisplay(this);
+        Displayable current = display.getCurrent();
+        if (!(current instanceof Alert))
+        {
+            // This next call can't be done when current is an Alert
+            display.setCurrent(alert, current);
+        }
+    }
+
+	// Skipping the first 44 bytes (WAV header)
+	// Loop through every byte-pair (Short) in this.output.
+	// For each Short, accumulate the sum of val^2.
+	// Return sum / (this.output.length/2)
+	public double getNoiseLevel()
+	{
+		long sum = 0;
+		try {
+			for (int i = 44; i < this.output.length; i += 2)
+			{
+				short val = SimpleTest.byteArrayToShort(this.output, i);
+				sum += val * val;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return (2.0 * sum)/this.output.length;
+	}
+	 /**
+     * Convert the byte array to an int starting from the given offset.
+     *
+     * @param b The byte array
+     * @param offset The array offset
+     * @return The integer
+     */
+    public static int byteArrayToInt(byte[] b, int offset) {
+        int value = 0;
+        for (int i = 0; i < 4; i++) {
+            //int shift = (bytewidth - 1 - i) * 8;
+        	int shift = i * 8;
+            value += (b[i + offset] & 0x000000FF) << shift;
+        }
+        return value;
+    }
+    public static short byteArrayToShort(byte[] b, int offset) {
+        short value = 0;
+        for (int i = 0; i < 2; i++) {
+        	int shift = i * 8;
+            value += (b[i + offset] & 0x000000FF) << shift;
+        }
+        return value;
+    }
+
+	// This UNUSED function is an example of how to playback an audio file.
 	public void playCallback()
 	{
 		String SNDFILE = "file:///E:/audio.wav";
@@ -246,65 +310,4 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 			this.alertError("MediaException in createPlayer:" + e.getMessage());
 		}
 	}
-	
-	public void alertError(String message)
-    {
-        Alert alert = new Alert("Error", message, null, AlertType.ERROR);
-        Display display = Display.getDisplay(this);
-        Displayable current = display.getCurrent();
-        if (!(current instanceof Alert))
-        {
-            // This next call can't be done when current is an Alert
-            display.setCurrent(alert, current);
-        }
-    }
-	
-	public double getNoiseLevel()
-	{
-		long sum = 0;
-		try {
-			//FileConnection fc = this.createFC("file:///E:/soundfile.txt", true);
-			//OutputStream os = fc.openOutputStream();
-			//os.write(output);
-			for (int i = 44; i < this.output.length; i += 2)
-			{
-				//String currentByte = String.valueOf(output[i]) + "\n";
-				//os.write(currentByte.getBytes());
-				//sum +=  java.lang.Math.abs(this.output[i] - 128);
-				short val = SimpleTest.byteArrayToShort(this.output, i);
-				//String currentInt = String.valueOf(val) + "\n";
-				//os.write(currentInt.getBytes());
-				sum += val * val;
-			}
-			//os.close();
-			//fc.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return (1.0 * sum)/this.output.length;
-	}
-	 /**
-     * Convert the byte array to an int starting from the given offset.
-     *
-     * @param b The byte array
-     * @param offset The array offset
-     * @return The integer
-     */
-    public static int byteArrayToInt(byte[] b, int offset) {
-        int value = 0;
-        for (int i = 0; i < 4; i++) {
-            //int shift = (bytewidth - 1 - i) * 8;
-        	int shift = i * 8;
-            value += (b[i + offset] & 0x000000FF) << shift;
-        }
-        return value;
-    }
-    public static short byteArrayToShort(byte[] b, int offset) {
-        short value = 0;
-        for (int i = 0; i < 2; i++) {
-        	int shift = i * 8;
-            value += (b[i + offset] & 0x000000FF) << shift;
-        }
-        return value;
-    }
 }
