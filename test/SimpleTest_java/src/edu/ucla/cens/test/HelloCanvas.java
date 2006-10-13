@@ -5,8 +5,8 @@ import javax.microedition.lcdui.*;
 public class HelloCanvas extends Canvas {
 	boolean myCanvasTXT = true;
 	SimpleTest midlet = null;
-	private double ave = 0;
-	private double peak = 0;
+	public double ave = 0;
+	public double peak = 0;
 	HelloCanvas(SimpleTest midlet)
 	{
 		this.midlet = midlet;

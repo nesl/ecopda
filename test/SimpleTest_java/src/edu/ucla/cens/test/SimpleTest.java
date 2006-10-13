@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.DataOutputStream;
 import java.util.Vector;
 
 import javax.microedition.io.Connector;
@@ -71,9 +72,9 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 		myCanvas.addCommand(recordCommand);
 		
 		myForm = new Form("Gauge level");
-		myGaugeTotal = new Gauge("Total Window Size (ms)", true, 1000, 1000);
-		myGaugeShared = new Gauge("Shared Window Size (ms)", true, 1000, 100);
-		textField = new TextField("Enter number", "", 3, TextField.NUMERIC);
+		myGaugeTotal = new Gauge("Total Window Size (ms)", true, 5000, 5000);
+		myGaugeShared = new Gauge("Shared Window Size (ms)", true, 5000, 4000);
+		textField = new TextField("Enter number", "", 4, TextField.NUMERIC);
 		
 		myForm.append(myGaugeTotal);
 		myForm.append(myGaugeShared);
@@ -186,12 +187,15 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 	{
 		try
 		{
-			if (event.equals("SHARED") ) 
+			if (event.compareTo("SHARED") == 0 ) 
 			{
+				// Close down the recorder.
 				this.rc.commit();
 				this.p.close();
 				this.output = tempoutput.toByteArray();
 				this.tempoutput.close();
+				
+				// Calculate the Noise level, save to this.power, and repaint.
 				double noiseLevel = this.getNoiseLevel();
 				if (this.power.size() >= 30)
 				{
@@ -199,16 +203,41 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 				} 
 				this.power.addElement(new Double(noiseLevel));
 				this.myCanvas.repaint();
+				
+				// If the noise level is above the threshold, then save it to file.
+				// The file name should be the time in ms.
+				if (noiseLevel > this.myCanvas.ave)
+				{
+					long time = java.util.Calendar.getInstance().getTime().getTime();
+					//TODO create an E:/soundscape/ directory
+					// Writes to a file that looks like: "e:/soundscape/123213124124.wav
+					String fname = "file:///E:/soundscape/" + String.valueOf(time) + ".wav";
+					FileConnection fconn = this.createFC(fname, true);
+					
+					if (fconn == null)
+					{
+						this.alertError("fconn was null");
+					}
+					else
+					{
+						DataOutputStream dataOutputStream = fconn.openDataOutputStream();
+						dataOutputStream.write(this.output);
+						dataOutputStream.close();
+					}
+				}
+				
+				// Set a timer callback.
 				int sleepMS = this.myGaugeTotal.getValue() - this.myGaugeShared.getValue();
 				if (sleepMS < 0) { sleepMS = 0; }
 				myThread = new Thread(new SimpleTestHelper(this, sleepMS , "TOTAL"));
+				myThread.start();
 			}
-			else if (event.equalsIgnoreCase("TOTAL"))
+			else if (event.compareTo("TOTAL") == 0)
 			{
 				this.recordCallback2();
 			}
 		} catch (Exception e) {
-			this.alertError("Exception in handing FOO:"+e.getMessage());
+			this.alertError("Exception in handing event:" + event + ":" +e.getMessage());
 		}
 	}
 
