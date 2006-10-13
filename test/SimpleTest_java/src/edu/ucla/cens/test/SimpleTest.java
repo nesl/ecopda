@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.DataOutputStream;
+//import java.io.DataOutputStream;
 import java.util.Vector;
 
 import javax.microedition.io.Connector;
@@ -20,6 +20,8 @@ import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 import javax.microedition.media.*;
 import javax.microedition.media.control.*;
+
+import javax.microedition.rms.*;
 
 public class SimpleTest extends MIDlet implements CommandListener, PlayerListener {
 	
@@ -61,6 +63,8 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 	private Command showCommand = new Command("Show Levels", Command.SCREEN, 1);
 	private Command recordCommand = new Command("Record", Command.SCREEN, 1);
 	private Command playCommand = new Command("Play", Command.SCREEN,1);
+	public RecordStore recordStore = null;
+	
 	
 	// This is the constructor method.
 	// It creates a Canvas and a Form object.
@@ -85,6 +89,24 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 		
 		myCanvas.setCommandListener(this);
 		myForm.setCommandListener(this);
+		
+		try
+		{
+			this.recordStore = RecordStore.openRecordStore("data", true);
+		}
+		catch (RecordStoreNotFoundException e)
+		{
+			this.alertError("Error: RecordStore not found:" + e.getMessage());
+		}
+		catch (RecordStoreFullException e)
+		{
+			this.alertError("Error: RecordStore full:" + e.getMessage());
+		}
+		catch (RecordStoreException e)
+		{
+			this.alertError("Error: RecordStore Exception:" + e.getMessage());
+		}
+		
 	}
 		
 	protected void destroyApp(boolean arg0) throws MIDletStateChangeException {
@@ -148,7 +170,7 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 				try {
 					fconn.create();
 				} catch (IOException e) {
-					this.alertError("Can't create file:" + arg + "/n" + e);
+					this.alertError("Can't create file:" + arg + "/n" + e.getMessage());
 					return null;				
 				}				
 			}
@@ -204,26 +226,27 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 				this.power.addElement(new Double(noiseLevel));
 				this.myCanvas.repaint();
 				
-				// If the noise level is above the threshold, then save it to file.
-				// The file name should be the time in ms.
+				// If the noise level is above the threshold, then save it to a record.
 				if (noiseLevel > this.myCanvas.ave)
 				{
-					long time = java.util.Calendar.getInstance().getTime().getTime();
+					
+//					long time = java.util.Calendar.getInstance().getTime().getTime();
 					//TODO create an E:/soundscape/ directory
 					// Writes to a file that looks like: "e:/soundscape/123213124124.wav
-					String fname = "file:///E:/soundscape/" + String.valueOf(time) + ".wav";
-					FileConnection fconn = this.createFC(fname, true);
-					
-					if (fconn == null)
-					{
-						this.alertError("fconn was null");
-					}
-					else
-					{
-						DataOutputStream dataOutputStream = fconn.openDataOutputStream();
-						dataOutputStream.write(this.output);
-						dataOutputStream.close();
-					}
+					// String fname = "file:///E:/soundscape/" + String.valueOf(time) + ".wav";
+					// FileConnection fconn = this.createFC(fname, true);
+//					
+//					if (fconn == null)
+//					{
+//						this.alertError("fconn was null");
+//					}
+//					else
+//					{
+//						DataOutputStream dataOutputStream = fconn.openDataOutputStream();
+//						dataOutputStream.write(this.output);
+//						dataOutputStream.close();
+//						fconn.close();
+//					}
 				}
 				
 				// Set a timer callback.
@@ -241,7 +264,7 @@ public class SimpleTest extends MIDlet implements CommandListener, PlayerListene
 		}
 	}
 
-	public void playCallback2()
+	private void playCallback2()
 	{
 		try
 		{
