@@ -16,11 +16,6 @@ public class HelloCanvas extends Canvas {
 		repaint();
 	}
 	
-	public void newMessage(){
-		myCanvasTXT = !myCanvasTXT;
-		repaint();
-	}
-	
 	// This draws the screen.
 	// It calls this.pointHistogram to draw the graph.
 	// It displays the message "CANVAS FONT".

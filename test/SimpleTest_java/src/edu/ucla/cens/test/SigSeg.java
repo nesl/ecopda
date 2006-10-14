@@ -10,14 +10,14 @@ public class SigSeg {
 	long timeMS = 0;
 	public byte[] data = null;
 	
-	public SigSeg (long timeMS, byte[] data)
+	SigSeg (long timeMS, byte[] data)
 	{
 		this.timeMS = timeMS;
 		this.data = data;
 		return;
 	}
 	
-	public SigSeg (byte[] record) throws IOException
+	SigSeg (byte[] record) throws IOException
 	{
 		ByteArrayInputStream byteIn = new ByteArrayInputStream(record);
 		DataInputStream dataIn = new DataInputStream(byteIn);
